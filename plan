@@ -1,0 +1,12 @@
+Things to search per model:
+Max learning rate
+Max epochs
+What it's optimizing towards (loss vs F1 vs MCC vs ...)
+Learning rate scheduler
+
+Search algorithm:
+genetic search
+
+Benchmark on BCI 4 datasets and others
+
+https://medium.com/@burak96egeli/optimizing-machine-learning-models-with-genetic-algorithm-based-hyperparameter-tuning-76d6f15fde6c
