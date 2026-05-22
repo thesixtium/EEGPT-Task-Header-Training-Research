@@ -9,6 +9,7 @@ from .generic_eegpt_model_lib.conv1dWithConstraint import Conv1dWithConstraint
 from .generic_eegpt_model_lib.linearWithConstraint import LinearWithConstraint
 from .generic_eegpt_model_lib.metricMethods import get_metrics
 from torchmetrics import F1Score
+from torchmetrics import MatthewsCorrCoef
 
 logger = getLogger()
 
@@ -16,11 +17,17 @@ logger = getLogger()
 seed_torch(7_11_2002)
 
 class GenericEEGPTModel( pl.LightningModule ):
-    def __init__(self, load_path, use_channels_names, output_classes, max_lr, steps_per_epoch, max_epochs):
+    def __init__(self, load_path, use_channels_names, output_classes, max_lr, steps_per_epoch, max_epochs, lr_scheduler_name, gamma, target_name):
         super().__init__()
+
+        self.lr_scheduler_name = lr_scheduler_name
+        self.gamma = gamma
+        self.target_name = target_name
 
         self.train_f1 = F1Score(task="multiclass", average="macro", num_classes=output_classes)
         self.valid_f1 = F1Score(task="multiclass", average="macro", num_classes=output_classes)
+        self.train_mcc = MatthewsCorrCoef(task="multiclass", average="macro", num_classes=output_classes)
+        self.valid_mcc = MatthewsCorrCoef(task="multiclass", average="macro", num_classes=output_classes)
 
         self.chans_num = len( use_channels_names )
 
@@ -123,6 +130,7 @@ class GenericEEGPTModel( pl.LightningModule ):
         preds = probs.argmax(dim=-1)
 
         self.train_f1.update(preds, y)
+        self.train_mcc.update(preds, y)
 
         self.log('train_loss', loss, on_epoch=True, on_step=False)
         self.log('train_acc', accuracy, on_epoch=True, on_step=False)
@@ -170,10 +178,12 @@ class GenericEEGPTModel( pl.LightningModule ):
         preds = probs.argmax(dim=-1)
 
         self.valid_f1.update(preds, y)
+        self.valid_mcc.update(preds, y)
         # Logging to TensorBoard by default
         self.log('valid_loss', loss, on_epoch=True, on_step=False)
         self.log('valid_acc', accuracy, on_epoch=True, on_step=False)
         self.log('valid_f1', self.valid_f1, on_epoch=True, on_step=False)
+        self.log('valid_mcc', self.valid_mcc, on_epoch=True, on_step=False)
 
         self.running_scores["valid"].append((label.clone().detach().cpu(), logit.clone().detach().cpu()))
         return loss
@@ -186,19 +196,50 @@ class GenericEEGPTModel( pl.LightningModule ):
             list(self.linear_probe2.parameters()),
             weight_decay=0.01)  #
 
-        lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=self.max_lr,
+        if self.lr_scheduler_name == "OneCycleLR":
+            lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=self.max_lr,
                                                            steps_per_epoch=self.steps_per_epoch, epochs=self.max_epochs,
                                                            pct_start=0.2)
-        lr_dict = {
-            'scheduler': lr_scheduler,  # The LR scheduler instance (required)
-            # The unit of the scheduler's step size, could also be 'step'
-            'interval': 'step',
-            'frequency': 1,  # The frequency of the scheduler
-            'monitor': 'valid_f1',  # Metric for `ReduceLROnPlateau` to monitor
-            #'monitor': 'val_loss',  # Metric for `ReduceLROnPlateau` to monitor
-            'strict': True,  # Whether to crash the training if `monitor` is not found
-            'name': None,  # Custom name for `LearningRateMonitor` to use
-        }
+        elif self.lr_scheduler_name == "StepLR":
+            lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, (self.steps_per_epoch * self.max_epochs) // 4, gamma=self.gamma)
+        elif self.lr_scheduler_name == "ReduceLROnPlateau":
+            lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer)
+        elif self.lr_scheduler_name == "ExponentialLR":
+            lr_scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, self.gamma)
+        else:  #CosineAnnealingLR
+            lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, self.steps_per_epoch * self.max_epochs)
+
+        if self.target_name == "loss":
+            lr_dict = {
+                'scheduler': lr_scheduler,  # The LR scheduler instance (required)
+                # The unit of the scheduler's step size, could also be 'step'
+                'interval': 'step',
+                'frequency': 1,  # The frequency of the scheduler
+                'monitor': 'val_loss',  # Metric for `ReduceLROnPlateau` to monitor
+                'strict': True,  # Whether to crash the training if `monitor` is not found
+                'name': None,  # Custom name for `LearningRateMonitor` to use
+            }
+        elif self.target_name == "f1score":
+            lr_dict = {
+                'scheduler': lr_scheduler,  # The LR scheduler instance (required)
+                # The unit of the scheduler's step size, could also be 'step'
+                'interval': 'step',
+                'frequency': 1,  # The frequency of the scheduler
+                'monitor': 'valid_f1',  # Metric for `ReduceLROnPlateau` to monitor
+                'strict': True,  # Whether to crash the training if `monitor` is not found
+                'name': None,  # Custom name for `LearningRateMonitor` to use
+            }
+        else:  # mcc
+            lr_dict = {
+                'scheduler': lr_scheduler,  # The LR scheduler instance (required)
+                # The unit of the scheduler's step size, could also be 'step'
+                'interval': 'step',
+                'frequency': 1,  # The frequency of the scheduler
+                'monitor': 'valid_mcc',  # Metric for `ReduceLROnPlateau` to monitor
+                #'monitor': 'val_loss',  # Metric for `ReduceLROnPlateau` to monitor
+                'strict': True,  # Whether to crash the training if `monitor` is not found
+                'name': None,  # Custom name for `LearningRateMonitor` to use
+            }
 
         return (
             {'optimizer': optimizer, 'lr_scheduler': lr_dict},
