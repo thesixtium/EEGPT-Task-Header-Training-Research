@@ -26,8 +26,8 @@ class GenericEEGPTModel( pl.LightningModule ):
 
         self.train_f1 = F1Score(task="multiclass", average="macro", num_classes=output_classes)
         self.valid_f1 = F1Score(task="multiclass", average="macro", num_classes=output_classes)
-        self.train_mcc = MatthewsCorrCoef(task="multiclass", average="macro", num_classes=output_classes)
-        self.valid_mcc = MatthewsCorrCoef(task="multiclass", average="macro", num_classes=output_classes)
+        self.train_mcc = MatthewsCorrCoef(task="multiclass", num_classes=output_classes)
+        self.valid_mcc = MatthewsCorrCoef(task="multiclass", num_classes=output_classes)
 
         self.chans_num = len( use_channels_names )
 
@@ -213,9 +213,9 @@ class GenericEEGPTModel( pl.LightningModule ):
             lr_dict = {
                 'scheduler': lr_scheduler,  # The LR scheduler instance (required)
                 # The unit of the scheduler's step size, could also be 'step'
-                'interval': 'step',
+                'interval': 'epoch',
                 'frequency': 1,  # The frequency of the scheduler
-                'monitor': 'val_loss',  # Metric for `ReduceLROnPlateau` to monitor
+                'monitor': 'valid_loss',  # Metric for `ReduceLROnPlateau` to monitor
                 'strict': True,  # Whether to crash the training if `monitor` is not found
                 'name': None,  # Custom name for `LearningRateMonitor` to use
             }
@@ -223,7 +223,7 @@ class GenericEEGPTModel( pl.LightningModule ):
             lr_dict = {
                 'scheduler': lr_scheduler,  # The LR scheduler instance (required)
                 # The unit of the scheduler's step size, could also be 'step'
-                'interval': 'step',
+                'interval': 'epoch',
                 'frequency': 1,  # The frequency of the scheduler
                 'monitor': 'valid_f1',  # Metric for `ReduceLROnPlateau` to monitor
                 'strict': True,  # Whether to crash the training if `monitor` is not found
@@ -233,7 +233,7 @@ class GenericEEGPTModel( pl.LightningModule ):
             lr_dict = {
                 'scheduler': lr_scheduler,  # The LR scheduler instance (required)
                 # The unit of the scheduler's step size, could also be 'step'
-                'interval': 'step',
+                'interval': 'epoch',
                 'frequency': 1,  # The frequency of the scheduler
                 'monitor': 'valid_mcc',  # Metric for `ReduceLROnPlateau` to monitor
                 #'monitor': 'val_loss',  # Metric for `ReduceLROnPlateau` to monitor
