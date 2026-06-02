@@ -3,10 +3,10 @@ import pytorch_lightning as pl
 from src.core.genericEEGPTModel import GenericEEGPTModel
 from src.core.generic_eegpt_model_lib.modelMethods import seed_torch
 from pytorch_lightning import loggers as pl_loggers
-#from datasets.BNCI2014_004 import DatasetBNCI2014_004
-#from datasets.BNCI2015_001 import DatasetBNCI2015_001
-#from src.train_new_eegpt_models.moabbMotorImageryDataLoader import MoabbMotorImageryDataLoader
-#from src.train_new_eegpt_models.csvDataLoader import CsvEegDataLoader
+from datasets.BNCI2014_004 import DatasetBNCI2014_004
+from datasets.BNCI2015_001 import DatasetBNCI2015_001
+from src.train_new_eegpt_models.moabbMotorImageryDataLoader import MoabbMotorImageryDataLoader
+from src.train_new_eegpt_models.csvDataLoader import CsvEegDataLoader
 from src.core.generic_eegpt_model_lib.metricMethods import metrics_display, get_latest_metrics_csv
 from src.core.getLibPaths import GetLibPaths
 
@@ -38,10 +38,7 @@ def train_EEGPT_model_from_dataset(
         max_epochs,
         max_lr,
         output_classes,
-        glp,
-        lr_scheduler_name,
-        gamma,
-        target_name
+        glp
 ):
         seed_torch(7_11_2002)
 
@@ -55,10 +52,7 @@ def train_EEGPT_model_from_dataset(
             output_classes=output_classes,
             max_lr=max_lr,
             steps_per_epoch=data.get_steps_per_epoch(),
-            max_epochs=max_epochs,
-            lr_scheduler_name=lr_scheduler_name,
-            gamma=gamma,
-            target_name=target_name
+            max_epochs=max_epochs
         )
 
         # most basic trainer, uses good defaults (auto-tensorboard, checkpoints, logs, and more)
@@ -99,45 +93,12 @@ def train_EEGPT_model_from_dataset(
         metrics_display(get_latest_metrics_csv(logs_path, model_name), model_name, glp.get_imgs_path() )
 
 if __name__ == '__main__':
-    # # # THINGS TO SEARCH # # #
-
-    max_learning_rate = 4e-4
-    max_epochs = 20
-    loaded_data = None
-    lr_scheduler_name = ["OneCycleLR", "StepLR", "ReduceLROnPlateau", "ExponentialLR", "CosineAnnealingLR"]
-    gamma = 0.1
-    target_name = ["f1score", "loss", "mcc"]
-
-    # # # THINGS TO SEARCH # # #
-
-
     seed_torch(7_11_2002)
     glp = GetLibPaths()
 
     base_model = glp.get_checkpoints_path() / "eegpt_mcae_58chs_4s_large4E.ckpt"
 
-    csv_path = "datasets/DSI7_Dummy.csv"
-    #loaded_data = CsvEegDataLoader(
-    #    csv_path,
-    #    ["right", "left"],
-    #    150
-    #)
-
-    train_EEGPT_model_from_dataset(
-        "DSI7_Dummy",
-        loaded_data,
-        ["F4", "C4", "P4", "P3", "C3", "F3"],
-        base_model,
-        max_epochs,
-        max_learning_rate,
-        2,
-        glp,
-        lr_scheduler_name,
-        gamma,
-        target_name
-    )
-
-    """datasets = [DatasetBNCI2015_001(), DatasetBNCI2014_004()]
+    datasets = [DatasetBNCI2015_001(), DatasetBNCI2014_004()]
     for dataset in datasets:
         loaded_data = MoabbMotorImageryDataLoader( dataset )
 
@@ -149,5 +110,4 @@ if __name__ == '__main__':
             20,
             4e-4,
             dataset.get_n_classes()
-        )"""
-
+        )

@@ -8,3 +8,6 @@
 /src/__pycache__
 /src/C-
 src/bciciv2b_all.csv
+/data
+/src/results
+/src/results_2datasets
