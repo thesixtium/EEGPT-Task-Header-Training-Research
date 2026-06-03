@@ -35,19 +35,7 @@ log.setLevel(logging.INFO)
 
 # ── imports ──────────────────────────────────────────────────────────────────
 from moabb.datasets import (
-    BNCI2014_004,
-    BNCI2015_001,
-    Zhou2020,
-    Wairagkar2018,
-    AlexMI,
-    BNCI2014_002,
-    Dreyer2023A,
-    Dreyer2023B,
-    Dreyer2023C,
-    HefmiIch2025,
-    Kumar2024,
-    Liu2024,
-    Rozado2015,
+    BNCI2014_009
 )
 
 # ---------------------------------------------------------------------------
@@ -55,19 +43,7 @@ from moabb.datasets import (
 # Each tuple is (moabb_dataset_object, dataset_id_string).
 # ---------------------------------------------------------------------------
 DATASETS_TO_TEST = [
-    (BNCI2014_004(),  'BNCI2014_004'),
-    (BNCI2015_001(),  'BNCI2015_001'),
-    (Zhou2020(),      'Zhou2020'),
-    (Wairagkar2018(), 'Wairagkar2018'),
-    (AlexMI(),        'AlexMI'),
-    (BNCI2014_002(),  'BNCI2014_002'),
-    (Dreyer2023A(),   'Dreyer2023A'),
-    (Dreyer2023B(),   'Dreyer2023B'),
-    (Dreyer2023C(),   'Dreyer2023C'),
-    (HefmiIch2025(),  'HefmiIch2025'),
-    (Kumar2024(),     'Kumar2024'),
-    (Liu2024(),       'Liu2024'),
-    (Rozado2015(),    'Rozado2015'),
+    (BNCI2014_009(),  'BNCI2014_009')
 ]
 
 # Test subject — just the first available subject per dataset to keep it fast.
@@ -167,18 +143,15 @@ def check_moabb_download(moabb_dataset, dataset_id: str, result: DatasetTestResu
 
         subject = subject_list[min(TEST_SUBJECT_INDEX, len(subject_list) - 1)]
 
-        from moabb.paradigms import MotorImagery
+        from moabb.paradigms import P300
         from framework.label_schema import DATASET_LABEL_MAPS
 
         # Infer n_classes for the paradigm from the label map
         n_classes = len(DATASET_LABEL_MAPS[dataset_id])
 
-        paradigm = MotorImagery(
-            n_classes=n_classes,
-            fmin=0.5,
-            fmax=40.0,
+        paradigm = P300(
             tmin=0.0,
-            tmax=4.0,
+            tmax=1.0
         )
         X, y, metadata = paradigm.get_data(
             dataset=moabb_dataset,
@@ -205,12 +178,11 @@ def check_label_translation(moabb_dataset, dataset_id: str, subject: int,
                              result: DatasetTestResult) -> bool:
     """Check 3 — at least some labels translate through LabelSchema."""
     try:
-        from moabb.paradigms import MotorImagery
+        from moabb.paradigms import P300
         from framework.label_schema import DATASET_LABEL_MAPS, LabelSchema
 
         n_classes = len(DATASET_LABEL_MAPS[dataset_id])
-        paradigm = MotorImagery(n_classes=n_classes, fmin=0.5, fmax=40.0,
-                                tmin=0.0, tmax=4.0)
+        paradigm = P300(tmin=0.0, tmax=1.0)
         _, y, _ = paradigm.get_data(dataset=moabb_dataset, subjects=[subject],
                                      return_epochs=False)
 
@@ -249,13 +221,12 @@ def check_channel_mapping(moabb_dataset, dataset_id: str, subject: int,
                            result: DatasetTestResult) -> bool:
     """Check 4 — at least some channels map to the EEGPT canonical space."""
     try:
-        from moabb.paradigms import MotorImagery
+        from moabb.paradigms import P300
         from framework.label_schema import DATASET_LABEL_MAPS
         from framework.canonical_channels import resolve_channel_subset
 
         n_classes = len(DATASET_LABEL_MAPS[dataset_id])
-        paradigm = MotorImagery(n_classes=n_classes, fmin=0.5, fmax=40.0,
-                                tmin=0.0, tmax=4.0)
+        paradigm = P300(tmin=0.0, tmax=1.0)
 
         # Get channel names
         if hasattr(moabb_dataset, 'channel_names'):
@@ -299,13 +270,12 @@ def check_preprocessing(moabb_dataset, dataset_id: str, subject: int,
                          result: DatasetTestResult) -> bool:
     """Check 5 — EEGPTPreprocessor produces correct output shape [N, C, 1024]."""
     try:
-        from moabb.paradigms import MotorImagery
+        from moabb.paradigms import P300
         from framework.label_schema import DATASET_LABEL_MAPS
         from framework.preprocessing import EEGPTPreprocessor
 
         n_classes = len(DATASET_LABEL_MAPS[dataset_id])
-        paradigm = MotorImagery(n_classes=n_classes, fmin=0.5, fmax=40.0,
-                                tmin=0.0, tmax=4.0)
+        paradigm = P300(tmin=0.0, tmax=1.0)
         X, _, _ = paradigm.get_data(dataset=moabb_dataset, subjects=[subject],
                                      return_epochs=False)
 

@@ -332,6 +332,7 @@ class ExperimentConfig:
     base_epochs: int = 20
     adapt_epochs: int = 10
     batch_size: int = 32
+    data_fraction: float = 1.0
 
     # Evaluation
     lso_enabled: bool = True
@@ -482,6 +483,31 @@ def load_datasets(
                 logger.info("Cached %s → %s", did, cache_path)
             except Exception as exc:
                 logger.warning("Could not cache %s: %s", did, exc)
+
+    # ── Optional data fraction ────────────────────────────────────────────
+    if cfg.data_fraction < 1.0:
+        import random
+        from collections import defaultdict
+
+        rng = random.Random(cfg.seed)
+        for did in list(loaded.keys()):
+            ds = loaded[did]
+            # Stratified subsample: preserve class balance
+            by_label = defaultdict(list)
+            for i, s in enumerate(ds.samples):
+                by_label[s.label].append(i)
+
+            keep = []
+            for label_indices in by_label.values():
+                rng.shuffle(label_indices)
+                n_keep = max(1, round(len(label_indices) * cfg.data_fraction))
+                keep.extend(label_indices[:n_keep])
+
+            loaded[did] = EEGSampleDataset([ds.samples[i] for i in sorted(keep)])
+            logger.info(
+                "data_fraction=%.2f: %s reduced %d → %d samples",
+                cfg.data_fraction, did, len(ds), len(loaded[did]),
+            )
 
     return loaded
 

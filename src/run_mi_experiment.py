@@ -21,15 +21,8 @@ from pathlib import Path
 
 from moabb.utils import set_download_dir
 from moabb.datasets import (
-    BNCI2014_004,
-    BNCI2015_001,
-    AlexMI,
-    Dreyer2023A,
-    Dreyer2023B,
-    Dreyer2023C,
-    HefmiIch2025,
-    Kumar2024,
-    Liu2024,
+    BNCI2014_009,
+    BI2014a
 )
 
 from framework.experiment_runner import ExperimentConfig, run_experiment
@@ -58,28 +51,24 @@ cfg = ExperimentConfig(
     # Add or remove MOABB dataset objects and their matching registry IDs.
     # The ID must exist as a key in label_schema.py → DATASET_LABEL_MAPS.
     datasets=[
-        BNCI2014_004(), BNCI2015_001(),
-        AlexMI(),
-        Dreyer2023A(), Dreyer2023B(), Dreyer2023C(),
-        HefmiIch2025(), Kumar2024(), Liu2024(),
+        BNCI2014_009(),
+        BI2014a()
     ],
     dataset_ids=[
-        'BNCI2014_004', 'BNCI2015_001',
-        'AlexMI',
-        'Dreyer2023A', 'Dreyer2023B', 'Dreyer2023C',
-        'HefmiIch2025', 'Kumar2024', 'Liu2024',
+        'BNCI2014_009', 'BI2014a'
     ],
 
     max_lr=4e-4,
     base_epochs=2,
     adapt_epochs=2,
+    data_fraction = 0.05,
     batch_size=32,
 
     lso_enabled=True,
     # None = hold out ALL subjects one at a time.
     # Set to e.g. [1, 2, 3] to hold out only those original subject IDs
     # (matched across every dataset that has them).
-    lso_subjects=[1,2],
+    lso_subjects=[1],
     test_session_idx=0,     # index of the held-out test session per subject
 
     # Separate folder for preprocessed .pt cache files.

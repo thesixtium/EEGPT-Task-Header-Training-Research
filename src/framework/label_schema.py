@@ -22,11 +22,8 @@ logger = logging.getLogger(__name__)
 # Global vocabulary
 # ---------------------------------------------------------------------------
 GLOBAL_LABELS: List[str] = [
-    'left_hand',    # 0
-    'right_hand',   # 1
-    'feet',         # 2
-    'rest',         # 3
-    #'tongue',       # 4
+    'Target',    # 0
+    'NonTarget',   # 1
 ]
 
 GLOBAL_LABEL_TO_IDX: Dict[str, int] = {lbl: idx for idx, lbl in enumerate(GLOBAL_LABELS)}
@@ -38,61 +35,13 @@ N_GLOBAL_CLASSES = len(GLOBAL_LABELS)
 # Keys are lowercase dataset string labels as returned by MOABB paradigm.
 # ---------------------------------------------------------------------------
 DATASET_LABEL_MAPS: Dict[str, Dict[str, str]] = {
-    'BNCI2014_004': {
-        'left_hand': 'left_hand',
-        'right_hand': 'right_hand',
+    'BNCI2014_009': {
+        'Target': 'Target',
+        'NonTarget': 'NonTarget',
     },
-    'BNCI2015_001': {
-        'right_hand': 'right_hand',
-        'feet': 'feet',
-    },
-    'Zhou2020': {
-        'left_hand': 'left_hand',
-        'right_hand': 'right_hand',
-        'feet': 'feet',
-        'rest': 'rest'
-    },
-    'Wairagkar2018': {
-        'right_hand': 'right_hand',
-        'rest': 'rest',
-        'left_hand': 'left_hand'
-    },
-    'AlexMI': {
-        'right_hand': 'right_hand',
-        'feet': 'feet',
-        'rest': 'rest'
-    },
-    'BNCI2014_002': {
-        'right_hand': 'right_hand',
-        'feet': 'feet'
-    },
-    'Dreyer2023A': {
-        'left_hand': 'left_hand',
-        'right_hand': 'right_hand'
-    },
-    'Dreyer2023B': {
-        'left_hand': 'left_hand',
-        'right_hand': 'right_hand'
-    },
-    'Dreyer2023C': {
-        'left_hand': 'left_hand',
-        'right_hand': 'right_hand'
-    },
-    'HefmiIch2025': {
-        'left_hand': 'left_hand',
-        'right_hand': 'right_hand'
-    },
-    'Kumar2024': {
-        'left_hand': 'left_hand',
-        'right_hand': 'right_hand'
-    },
-    'Liu2024': {
-        'left_hand': 'left_hand',
-        'right_hand': 'right_hand'
-    },
-    'Rozado2015': {
-        'left_hand': 'left_hand',
-        'rest': 'rest'
+    'BI2014a': {
+        'Target': 'Target',
+        'NonTarget': 'NonTarget',
     },
 }
 
@@ -107,15 +56,8 @@ DATASET_LABEL_MAPS: Dict[str, Dict[str, str]] = {
 # available across all MOABB versions.
 # ---------------------------------------------------------------------------
 DATASET_SAMPLE_RATES: Dict[str, int] = {
-    'BNCI2014_004':  250,
-    'BNCI2015_001':  512,
-    'AlexMI':        512,
-    'Dreyer2023A':   512,
-    'Dreyer2023B':   512,
-    'Dreyer2023C':   512,
-    'HefmiIch2025':  256,
-    'Kumar2024':     512,
-    'Liu2024':       500,
+    'BNCI2014_009':  256,
+    'BI2014a': 512
 }
 
 
