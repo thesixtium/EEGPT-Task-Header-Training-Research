@@ -1,0 +1,46 @@
+2026-06-05 15:55:50  INFO      root  Logging to results\eegnet_p300_loso\logs\experiment.log
+2026-06-05 15:55:50  INFO      __main__  Starting experiment: eegnet_p300_loso
+2026-06-05 15:55:50  INFO      __main__  Config: Config(experiment_name='eegnet_p300_loso', seed=42, test_subjects=[0, 1, 2, 3], n_channels=8, n_timepoints=120, n_epochs=50, batch_size=32, learning_rate=0.001, moabb_download_dir='C:\\Users\\ajrbe/mne_data', dataset_cache_dir='data/cache', output_dir='results', save_checkpoints=True, num_workers=0)
+2026-06-05 15:55:50  INFO      __main__  Loading dataset…
+2026-06-05 15:55:50  WARNING   root  load_dataset: using synthetic data.  Replace this function body with real MOABB loading for actual experiments.
+2026-06-05 15:55:50  INFO      __main__  Dataset loaded: 2000 samples
+2026-06-05 15:55:50  INFO      training.loso_runner  GPU not available — using CPU
+2026-06-05 15:55:50  INFO      training.loso_runner  ============================================================
+2026-06-05 15:55:50  INFO      training.loso_runner  LOSO fold 1/4 — held-out subject: 0
+2026-06-05 15:55:50  INFO      training.loso_runner  Subject 0: 1800 train samples, 200 test samples
+2026-06-05 15:55:57  INFO      training.trainer  Epoch 1/50 — train_loss: 0.7161  val_loss: 0.6573
+2026-06-05 15:56:02  INFO      training.trainer  Epoch 2/50 — train_loss: 0.6929  val_loss: 0.6593
+2026-06-05 15:56:08  INFO      training.trainer  Epoch 3/50 — train_loss: 0.6844  val_loss: 0.6492
+2026-06-05 15:56:13  INFO      training.trainer  Epoch 4/50 — train_loss: 0.6817  val_loss: 0.6372
+2026-06-05 15:56:18  INFO      training.trainer  Epoch 5/50 — train_loss: 0.6788  val_loss: 0.6299
+2026-06-05 15:56:28  INFO      root  Logging to results\eegnet_p300_loso\logs\experiment.log
+2026-06-05 15:56:28  INFO      __main__  Starting experiment: eegnet_p300_loso
+2026-06-05 15:56:28  INFO      __main__  Config: Config(experiment_name='eegnet_p300_loso', seed=42, test_subjects=[0], n_channels=8, n_timepoints=120, n_epochs=50, batch_size=32, learning_rate=0.001, moabb_download_dir='C:\\Users\\ajrbe/mne_data', dataset_cache_dir='data/cache', output_dir='results', save_checkpoints=True, num_workers=0)
+2026-06-05 15:56:28  INFO      __main__  Loading dataset…
+2026-06-05 15:56:28  WARNING   root  load_dataset: using synthetic data.  Replace this function body with real MOABB loading for actual experiments.
+2026-06-05 15:56:28  INFO      __main__  Dataset loaded: 2000 samples
+2026-06-05 15:56:28  INFO      training.loso_runner  GPU not available — using CPU
+2026-06-05 15:56:28  INFO      training.loso_runner  ============================================================
+2026-06-05 15:56:28  INFO      training.loso_runner  LOSO fold 1/1 — held-out subject: 0
+2026-06-05 15:56:28  INFO      training.loso_runner  Subject 0: 1800 train samples, 200 test samples
+2026-06-05 15:56:35  INFO      training.trainer  Epoch 1/50 — train_loss: 0.7161  val_loss: 0.6573
+2026-06-05 15:56:40  INFO      training.trainer  Epoch 2/50 — train_loss: 0.6929  val_loss: 0.6593
+2026-06-05 15:56:46  INFO      root  Logging to results\eegnet_p300_loso\logs\experiment.log
+2026-06-05 15:56:46  INFO      __main__  Starting experiment: eegnet_p300_loso
+2026-06-05 15:56:46  INFO      __main__  Config: Config(experiment_name='eegnet_p300_loso', seed=42, test_subjects=[0], n_channels=8, n_timepoints=120, n_epochs=2, batch_size=32, learning_rate=0.001, moabb_download_dir='C:\\Users\\ajrbe/mne_data', dataset_cache_dir='data/cache', output_dir='results', save_checkpoints=True, num_workers=0)
+2026-06-05 15:56:46  INFO      __main__  Loading dataset…
+2026-06-05 15:56:46  WARNING   root  load_dataset: using synthetic data.  Replace this function body with real MOABB loading for actual experiments.
+2026-06-05 15:56:46  INFO      __main__  Dataset loaded: 2000 samples
+2026-06-05 15:56:46  INFO      training.loso_runner  GPU not available — using CPU
+2026-06-05 15:56:46  INFO      training.loso_runner  ============================================================
+2026-06-05 15:56:46  INFO      training.loso_runner  LOSO fold 1/1 — held-out subject: 0
+2026-06-05 15:56:46  INFO      training.loso_runner  Subject 0: 1800 train samples, 200 test samples
+2026-06-05 15:56:52  INFO      training.trainer  Epoch 1/2 — train_loss: 0.7161  val_loss: 0.6573
+2026-06-05 15:56:58  INFO      training.trainer  Epoch 2/2 — train_loss: 0.6929  val_loss: 0.6593
+2026-06-05 15:56:58  INFO      training.trainer  Checkpoint saved to results\eegnet_p300_loso\checkpoints\subject_0.pt
+2026-06-05 15:56:58  INFO      evaluation.metrics  Evaluation — acc: 0.6450  bal_acc: 0.4586  f1: 0.4603  auc: 0.4672  n=200
+2026-06-05 15:56:58  INFO      training.loso_runner  Subject result saved to results\eegnet_p300_loso\logs\subject_0.json
+2026-06-05 15:56:58  INFO      training.loso_runner  LOSO summary saved to results\eegnet_p300_loso\logs\loso_summary.json
+2026-06-05 15:56:58  INFO      evaluation.analytics  Results CSV written to results\eegnet_p300_loso\logs\loso_results.csv
+2026-06-05 15:56:58  INFO      evaluation.analytics  Confusion matrix saved to results\eegnet_p300_loso\logs\confusion_matrices\confusion_matrix_subject_0.png
+2026-06-05 15:56:58  INFO      __main__  Experiment complete.  Results in: results\eegnet_p300_loso
