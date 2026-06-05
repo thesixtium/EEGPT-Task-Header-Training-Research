@@ -10,6 +10,9 @@ Provides:
   - AdaptationCurveAnalyser     — zero-shot vs adapted performance plots
   - DatasetCompositionAnalyser  — dataset breakdown charts (samples, subjects,
                                    sessions, class distribution, train/held-out split)
+  - TrainingCurvePlotter        — parse PL CSVLogger output and save training
+                                   curve plots (loss, accuracy, F1, MCC) for the
+                                   shared base model
   - ExperimentLogger            — structured JSON + CSV experiment storage
   - plot_adaptation_curves      — matplotlib visualisation (optional)
 """
@@ -779,6 +782,279 @@ class DatasetCompositionAnalyser:
 
 
 # ---------------------------------------------------------------------------
+# Base-model training curve plotter
+# ---------------------------------------------------------------------------
+
+class TrainingCurvePlotter:
+    """
+    Parse PyTorch Lightning CSVLogger output and produce per-metric training
+    curve plots for the shared base model.
+
+    Expected directory layout written by CSVLogger:
+        <logs_dir>/base_model_training/version_0/metrics.csv
+
+    Columns typically logged by GenericEEGPTModel each epoch:
+        epoch, train_loss, valid_loss,
+        train_accuracy, valid_accuracy,
+        train_f1_macro, valid_f1_macro,       (if logged by the model)
+        train_mcc,      valid_mcc             (if logged by the model)
+
+    Only columns that actually exist in the CSV are plotted; missing metrics
+    are silently skipped rather than raising an error.
+
+    Parameters
+    ----------
+    logs_dir : Path
+        Root directory passed to CSVLogger (``logs_dir`` in
+        ``train_base_model``).
+    run_name : str
+        The ``name`` argument used when constructing CSVLogger (default
+        ``'base_model_training'``).
+    save_dir : Path
+        Where to write the PNG files.  Created automatically if absent.
+    """
+
+    # Metric groups: (csv_train_col, csv_val_col, y_axis_label, filename_stem)
+    _METRIC_GROUPS: List[Tuple[str, str, str, str]] = [
+        ('train_loss',     'valid_loss',     'Loss',     'loss'),
+        ('train_accuracy', 'valid_accuracy', 'Accuracy', 'accuracy'),
+        ('train_f1_macro', 'valid_f1_macro', 'F1 Macro', 'f1_macro'),
+        ('train_mcc',      'valid_mcc',      'MCC',      'mcc'),
+    ]
+
+    def __init__(
+        self,
+        logs_dir: Path,
+        run_name: str = 'base_model_training',
+        save_dir: Optional[Path] = None,
+    ) -> None:
+        self.logs_dir = Path(logs_dir)
+        self.run_name = run_name
+        self.save_dir = Path(save_dir) if save_dir else self.logs_dir / run_name / 'plots'
+        self.save_dir.mkdir(parents=True, exist_ok=True)
+
+    # ------------------------------------------------------------------
+    def find_metrics_csv(self) -> Optional[Path]:
+        """
+        Locate the metrics.csv produced by CSVLogger.
+
+        CSVLogger writes to  <logs_dir>/<run_name>/version_<N>/metrics.csv.
+        We return the most-recently-written version.
+        """
+        pattern = self.logs_dir / self.run_name / 'version_*' / 'metrics.csv'
+        import glob
+        candidates = sorted(
+            glob.glob(str(pattern)),
+            key=lambda p: Path(p).stat().st_mtime,
+        )
+        if not candidates:
+            logger.warning(
+                "TrainingCurvePlotter: no metrics.csv found under %s. "
+                "Ensure CSVLogger is attached to the base-model Trainer.",
+                self.logs_dir / self.run_name,
+            )
+            return None
+        return Path(candidates[-1])
+
+    # ------------------------------------------------------------------
+    def load_metrics(self, csv_path: Path) -> Dict[str, Any]:
+        """
+        Load metrics.csv and aggregate step-level rows into per-epoch series.
+
+        PL CSVLogger emits one row per *log step*, not per epoch, and
+        mixes train/val columns (one is NaN per row).  We forward-fill NaN
+        values and then downsample to one row per epoch by taking the last
+        non-NaN value in each epoch.
+
+        Returns a dict mapping column name → list of (epoch, value) pairs,
+        covering only columns that have at least two non-NaN data points.
+        """
+        import csv
+
+        rows: List[Dict[str, str]] = []
+        with open(csv_path, newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                rows.append(row)
+
+        if not rows:
+            return {}
+
+        all_cols = list(rows[0].keys())
+        metric_cols = [c for c in all_cols if c not in ('epoch', 'step')]
+
+        # Build per-column epoch-keyed series
+        epoch_data: Dict[str, Dict[int, float]] = {c: {} for c in metric_cols}
+
+        for row in rows:
+            try:
+                epoch = int(float(row.get('epoch', -1)))
+            except (ValueError, TypeError):
+                continue
+            if epoch < 0:
+                continue
+            for col in metric_cols:
+                raw = row.get(col, '')
+                if raw in ('', 'None', 'nan', 'NaN'):
+                    continue
+                try:
+                    val = float(raw)
+                    if not math.isnan(val):
+                        epoch_data[col][epoch] = val
+                except (ValueError, TypeError):
+                    pass
+
+        # Convert to sorted lists; keep only cols with ≥2 data points
+        result: Dict[str, Any] = {}
+        for col, ep_map in epoch_data.items():
+            if len(ep_map) < 2:
+                continue
+            epochs_sorted = sorted(ep_map.keys())
+            result[col] = {
+                'epochs': epochs_sorted,
+                'values': [ep_map[e] for e in epochs_sorted],
+            }
+
+        return result
+
+    # ------------------------------------------------------------------
+    def plot_all(self, csv_path: Optional[Path] = None) -> List[Path]:
+        """
+        Generate and save one PNG per metric group.
+
+        Parameters
+        ----------
+        csv_path : optional override — if None, ``find_metrics_csv()`` is used.
+
+        Returns the list of saved PNG paths (may be empty if matplotlib is
+        unavailable or the CSV cannot be found).
+        """
+        if not _MATPLOTLIB_AVAILABLE:
+            logger.warning("TrainingCurvePlotter: matplotlib not available, skipping plots.")
+            return []
+
+        if csv_path is None:
+            csv_path = self.find_metrics_csv()
+        if csv_path is None:
+            return []
+
+        logger.info("TrainingCurvePlotter: reading %s", csv_path)
+        metrics = self.load_metrics(csv_path)
+
+        if not metrics:
+            logger.warning("TrainingCurvePlotter: no usable metric columns found in %s", csv_path)
+            return []
+
+        saved: List[Path] = []
+        for train_col, val_col, ylabel, stem in self._METRIC_GROUPS:
+            has_train = train_col in metrics
+            has_val   = val_col   in metrics
+            if not has_train and not has_val:
+                logger.debug("TrainingCurvePlotter: skipping '%s' — no data.", stem)
+                continue
+
+            out_path = self._plot_metric(
+                train_series=metrics.get(train_col),
+                val_series=metrics.get(val_col),
+                ylabel=ylabel,
+                title=f'Base Model Training — {ylabel}',
+                save_path=self.save_dir / f'base_model_{stem}.png',
+            )
+            if out_path:
+                saved.append(out_path)
+
+        logger.info(
+            "TrainingCurvePlotter: saved %d training-curve plot(s) to %s",
+            len(saved), self.save_dir,
+        )
+        return saved
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _plot_metric(
+        train_series: Optional[Dict[str, Any]],
+        val_series:   Optional[Dict[str, Any]],
+        ylabel: str,
+        title: str,
+        save_path: Path,
+    ) -> Optional[Path]:
+        """Render a single train/val metric plot and save it."""
+        fig, ax = plt.subplots(figsize=(9, 5))
+
+        if train_series:
+            ax.plot(
+                train_series['epochs'],
+                train_series['values'],
+                color='#2196F3',
+                linewidth=2,
+                marker='o',
+                markersize=3,
+                label='Train',
+            )
+        if val_series:
+            ax.plot(
+                val_series['epochs'],
+                val_series['values'],
+                color='#F44336',
+                linewidth=2,
+                marker='s',
+                markersize=3,
+                label='Validation',
+                linestyle='--',
+            )
+
+        ax.set_xlabel('Epoch', fontsize=11)
+        ax.set_ylabel(ylabel, fontsize=11)
+        ax.set_title(title, fontsize=13, fontweight='bold', pad=10)
+        ax.legend(fontsize=10)
+        ax.grid(True, linestyle='--', alpha=0.4)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+        # Format y-axis as percentage for accuracy/F1/MCC when values ≤ 1
+        all_vals = []
+        if train_series:
+            all_vals.extend(train_series['values'])
+        if val_series:
+            all_vals.extend(val_series['values'])
+        if all_vals and max(all_vals) <= 1.05 and min(all_vals) >= -1.05 and ylabel != 'Loss':
+            ax.yaxis.set_major_formatter(mticker.PercentFormatter(xmax=1.0))
+
+        fig.tight_layout()
+        try:
+            fig.savefig(save_path, dpi=150, bbox_inches='tight')
+            logger.info("Saved training curve: %s", save_path)
+        except Exception as exc:
+            logger.warning("Could not save %s: %s", save_path, exc)
+            plt.close(fig)
+            return None
+        plt.close(fig)
+        return save_path
+
+    # ------------------------------------------------------------------
+    @classmethod
+    def plot_from_trainer(
+        cls,
+        logs_dir: Path,
+        run_name: str = 'base_model_training',
+        save_dir: Optional[Path] = None,
+    ) -> List[Path]:
+        """
+        Convenience class-method: construct, find CSV, and plot in one call.
+
+        Typical usage immediately after ``trainer.fit()``:
+
+            TrainingCurvePlotter.plot_from_trainer(
+                logs_dir=logs_dir,
+                run_name='base_model_training',
+                save_dir=output_root / 'summary' / 'base_model_curves',
+            )
+        """
+        plotter = cls(logs_dir=logs_dir, run_name=run_name, save_dir=save_dir)
+        return plotter.plot_all()
+
+
+# ---------------------------------------------------------------------------
 # Experiment logger — structured JSON + CSV storage
 # ---------------------------------------------------------------------------
 
@@ -804,9 +1080,11 @@ class ExperimentLogger:
         self.curves_dir = self.summary_dir / 'adaptation_curves'
         self.cm_dir = self.summary_dir / 'confusion_matrices'
         self.composition_dir = self.summary_dir / 'dataset_composition'
+        self.base_model_curves_dir = self.summary_dir / 'base_model_curves'
 
         for d in [self.root, self.per_subject_dir, self.summary_dir,
-                  self.curves_dir, self.cm_dir, self.composition_dir]:
+                  self.curves_dir, self.cm_dir, self.composition_dir,
+                  self.base_model_curves_dir]:
             d.mkdir(parents=True, exist_ok=True)
 
     def log_config(self, config: Dict[str, Any]) -> None:
@@ -961,3 +1239,38 @@ class ExperimentLogger:
             title=f'Subject {subject_id} — Stage {stage}',
             save_path=self.cm_dir / f'subject{subject_id}_stage{stage}.png',
         )
+
+    def generate_base_model_training_curves(
+        self,
+        logs_dir: Path,
+        run_name: str = 'base_model_training',
+    ) -> List[Path]:
+        """
+        Parse the CSVLogger metrics produced during base-model training and
+        save training-curve PNG files (loss, accuracy, F1 macro, MCC).
+
+        Parameters
+        ----------
+        logs_dir : Path
+            The ``logs_dir`` directory passed to the base-model Trainer's
+            CSVLogger.  CSVLogger writes to
+            ``<logs_dir>/<run_name>/version_<N>/metrics.csv``.
+        run_name : str
+            The ``name`` argument used when building the CSVLogger (defaults
+            to ``'base_model_training'``).
+
+        Returns
+        -------
+        List of Path objects for each saved PNG (may be empty on failure).
+        """
+        saved = TrainingCurvePlotter.plot_from_trainer(
+            logs_dir=Path(logs_dir),
+            run_name=run_name,
+            save_dir=self.base_model_curves_dir,
+        )
+        if saved:
+            logger.info(
+                "Base-model training curves written to %s (%d plots)",
+                self.base_model_curves_dir, len(saved),
+            )
+        return saved

@@ -54,7 +54,7 @@ from .dataset_registry import MoabbDatasetLoader
 from .eeg_dataset import EEGSample, EEGSampleDataset
 from .multi_dataset_loader import ConcatDataLoader, subject_split, train_val_test_split
 from .leave_subjects_out import LeaveSubjectsOutEvaluator
-from .analytics import ExperimentLogger, compute_metrics_from_model
+from .analytics import ExperimentLogger, compute_metrics_from_model, TrainingCurvePlotter
 from .preprocessing import TARGET_SAMPLE_RATE
 
 logger = logging.getLogger(__name__)
@@ -588,6 +588,8 @@ def train_base_model(
     model_factory,
     checkpoints_dir: Path,
     status: StatusLogger,
+    logs_dir: Optional[Path] = None,
+    exp_logger=None,
 ) -> Path:
     """
     Train a single shared base model on training_dataset (all non-held-out
@@ -656,6 +658,12 @@ def train_base_model(
         log_every_n_steps=1,
         num_sanity_val_steps=0,
         default_root_dir=str(checkpoints_dir),
+        logger=[
+            pl.loggers.CSVLogger(
+                str(logs_dir) if logs_dir else str(checkpoints_dir / 'logs'),
+                name='base_model_training',
+            )
+        ],
     )
     trainer.fit(
         model,
@@ -666,6 +674,21 @@ def train_base_model(
     checkpoints_dir.mkdir(parents=True, exist_ok=True)
     trainer.save_checkpoint(str(base_ckpt_path))
     logger.info("Shared base model saved to: %s", base_ckpt_path)
+
+    # ── Plot training curves ───────────────────────────────────────────────
+    _effective_logs_dir = Path(logs_dir) if logs_dir else checkpoints_dir / 'logs'
+    if exp_logger is not None:
+        exp_logger.generate_base_model_training_curves(
+            logs_dir=_effective_logs_dir,
+            run_name='base_model_training',
+        )
+    else:
+        from .analytics import TrainingCurvePlotter
+        TrainingCurvePlotter.plot_from_trainer(
+            logs_dir=_effective_logs_dir,
+            run_name='base_model_training',
+            save_dir=_effective_logs_dir / 'base_model_training' / 'plots',
+        )
 
     return base_ckpt_path
 
@@ -1086,6 +1109,8 @@ def run_experiment(cfg: ExperimentConfig) -> None:
             model_factory=model_factory,
             checkpoints_dir=checkpoints_dir,
             status=status,
+            logs_dir=logs_dir,
+            exp_logger=exp_logger,
         )
     else:
         # Use the pretrained backbone directly as the base checkpoint.

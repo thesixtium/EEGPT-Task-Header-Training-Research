@@ -59,9 +59,9 @@ cfg = ExperimentConfig(
     ],
 
     max_lr=4e-4,
-    base_epochs=2,
-    adapt_epochs=2,
-    data_fraction = 0.05,
+    base_epochs=20,
+    adapt_epochs=1,
+    data_fraction = .2,
     batch_size=32,
 
     lso_enabled=True,
