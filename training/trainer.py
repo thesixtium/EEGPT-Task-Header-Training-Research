@@ -15,12 +15,18 @@ Responsibilities:
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 import logging
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+
+try:
+    from tqdm import tqdm
+    _TQDM = True
+except ImportError:
+    _TQDM = False
 
 logger = logging.getLogger(__name__)
 
@@ -63,13 +69,37 @@ def train_model(
     if val_loader is not None:
         history["val_loss"] = []
 
-    for epoch in range(1, n_epochs + 1):
-        train_loss = _run_epoch(model, train_loader, criterion, optimizer, device, train=True)
+    # Outer epoch loop — dynamic_ncols keeps the bar width correct in any terminal.
+    # leave=True so the final epoch bar stays visible after training completes.
+    epoch_iter = (
+        tqdm(range(1, n_epochs + 1), desc="Training", unit="epoch",
+             leave=True, dynamic_ncols=True, position=0)
+        if _TQDM else range(1, n_epochs + 1)
+    )
+
+    for epoch in epoch_iter:
+        train_loss = _run_epoch(
+            model, train_loader, criterion, optimizer, device,
+            train=True, epoch=epoch, n_epochs=n_epochs,
+        )
         history["train_loss"].append(train_loss)
 
+        val_loss = None
         if val_loader is not None:
-            val_loss = _run_epoch(model, val_loader, criterion, optimizer=None, device=device, train=False)
+            val_loss = _run_epoch(
+                model, val_loader, criterion, optimizer=None, device=device,
+                train=False,
+            )
             history["val_loss"].append(val_loss)
+
+        # Update tqdm postfix so the user sees live loss numbers
+        if _TQDM and hasattr(epoch_iter, "set_postfix"):
+            postfix = {"train_loss": f"{train_loss:.4f}"}
+            if val_loss is not None:
+                postfix["val_loss"] = f"{val_loss:.4f}"
+            epoch_iter.set_postfix(postfix)
+
+        if val_loss is not None:
             logger.info(
                 "Epoch %d/%d — train_loss: %.4f  val_loss: %.4f",
                 epoch, n_epochs, train_loss, val_loss,
@@ -92,15 +122,31 @@ def _run_epoch(
     optimizer: Optional[torch.optim.Optimizer],
     device: torch.device,
     train: bool,
+    epoch: int = 0,
+    n_epochs: int = 0,
 ) -> float:
     """Run one full pass over the loader. Returns mean loss."""
     model.train(train)
     total_loss = 0.0
     n_batches = 0
 
+    # Inner batch-level progress bar — position=1 nests it below the epoch bar,
+    # leave=False so it erases itself when the epoch finishes.
+    if _TQDM and train and len(loader) > 1:
+        batch_iter = tqdm(
+            loader,
+            desc=f"  Epoch {epoch}/{n_epochs}",
+            unit="batch",
+            leave=False,
+            dynamic_ncols=True,
+            position=1,
+        )
+    else:
+        batch_iter = loader
+
     context = torch.enable_grad() if train else torch.no_grad()
     with context:
-        for x, y in loader:
+        for x, y in batch_iter:
             x = x.to(device)
             y = y.to(device)
 
@@ -114,5 +160,8 @@ def _run_epoch(
 
             total_loss += loss.item()
             n_batches += 1
+
+            if _TQDM and train and hasattr(batch_iter, "set_postfix"):
+                batch_iter.set_postfix({"loss": f"{loss.item():.4f}"})
 
     return total_loss / max(n_batches, 1)

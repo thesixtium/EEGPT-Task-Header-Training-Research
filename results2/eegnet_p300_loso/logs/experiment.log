@@ -1,0 +1,5 @@
+2026-06-06 13:54:55  INFO      root  Logging to results2\eegnet_p300_loso\logs\experiment.log
+2026-06-06 13:54:55  INFO      __main__  Starting experiment: eegnet_p300_loso
+2026-06-06 13:54:55  INFO      __main__  Config: Config(experiment_name='eegnet_p300_loso', seed=42, test_subjects=4, n_channels=8, n_timepoints=120, n_epochs=5, batch_size=32, learning_rate=0.001, moabb_download_dir='C:\\Users\\ajrbe/mne_data', dataset_cache_dir='data/cache', data_fraction=0.1, output_dir='results2', save_checkpoints=True, num_workers=0)
+2026-06-06 13:54:55  INFO      __main__  Loading datasets…
+2026-06-06 13:54:55  INFO      framework.dataset_registry  Loading subject 1 from Mainsah2025_A

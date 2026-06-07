@@ -1,0 +1,195 @@
+2026-06-06 13:59:59  INFO      root  Logging to results3\eegnet_p300_loso\logs\experiment.log
+2026-06-06 13:59:59  INFO      __main__  Starting experiment: eegnet_p300_loso
+2026-06-06 13:59:59  INFO      __main__  Config: Config(experiment_name='eegnet_p300_loso', seed=42, test_subjects=4, n_channels=8, n_timepoints=120, n_epochs=5, batch_size=32, learning_rate=0.001, moabb_download_dir='C:\\Users\\ajrbe/mne_data', dataset_cache_dir='data/cache', data_fraction=0.1, output_dir='results3', save_checkpoints=True, num_workers=0)
+2026-06-06 13:59:59  INFO      __main__  Loading datasets…
+2026-06-06 14:00:00  INFO      framework.dataset_registry  Loading subject 1 from Mainsah2025_A
+2026-06-06 14:00:15  INFO      framework.canonical_channels  Channel mapping: 32/33 dataset channels resolved to canonical space
+2026-06-06 14:00:15  INFO      framework.preprocessing  EEGPTPreprocessor: 32 channels, source_sfreq=256 Hz -> 256 Hz, window=256 samples (1.000 s)
+2026-06-06 14:00:18  INFO      framework.dataset_registry  Loading subject 2 from Mainsah2025_A
+2026-06-06 14:16:44  INFO      framework.dataset_registry  Loading subject 3 from Mainsah2025_A
+2026-06-06 14:33:41  INFO      framework.dataset_registry  Loading subject 4 from Mainsah2025_A
+2026-06-06 14:49:21  INFO      framework.dataset_registry  Loading subject 5 from Mainsah2025_A
+2026-06-06 15:05:44  INFO      framework.dataset_registry  Loading subject 6 from Mainsah2025_A
+2026-06-06 15:20:59  INFO      framework.dataset_registry  Loading subject 7 from Mainsah2025_A
+2026-06-06 15:36:47  INFO      framework.dataset_registry  Loading subject 9 from Mainsah2025_A
+2026-06-06 15:52:45  INFO      framework.dataset_registry  Loading subject 14 from Mainsah2025_A
+2026-06-06 16:08:18  INFO      framework.dataset_registry  Loading subject 15 from Mainsah2025_A
+2026-06-06 16:23:33  INFO      framework.dataset_registry  Loading subject 16 from Mainsah2025_A
+2026-06-06 16:39:22  INFO      framework.dataset_registry  Loading subject 17 from Mainsah2025_A
+2026-06-06 16:55:29  INFO      framework.dataset_registry  Loading subject 19 from Mainsah2025_A
+2026-06-06 17:12:06  INFO      framework.dataset_registry  Mainsah2025_A: loaded 336024 samples across 13 subjects
+2026-06-06 17:12:06  INFO      framework.dataset_registry  Loading subject 1 from BNCI2014_009
+2026-06-06 17:12:07  INFO      framework.canonical_channels  Channel mapping: 16/18 dataset channels resolved to canonical space
+2026-06-06 17:12:07  INFO      framework.preprocessing  EEGPTPreprocessor: 16 channels, source_sfreq=256 Hz -> 256 Hz, window=256 samples (1.000 s)
+2026-06-06 17:12:07  INFO      framework.dataset_registry  Loading subject 2 from BNCI2014_009
+2026-06-06 17:12:08  INFO      framework.dataset_registry  Loading subject 3 from BNCI2014_009
+2026-06-06 17:12:09  INFO      framework.dataset_registry  Loading subject 4 from BNCI2014_009
+2026-06-06 17:12:09  INFO      framework.dataset_registry  Loading subject 5 from BNCI2014_009
+2026-06-06 17:12:10  INFO      framework.dataset_registry  Loading subject 6 from BNCI2014_009
+2026-06-06 17:12:11  INFO      framework.dataset_registry  Loading subject 7 from BNCI2014_009
+2026-06-06 17:12:12  INFO      framework.dataset_registry  Loading subject 8 from BNCI2014_009
+2026-06-06 17:12:12  INFO      framework.dataset_registry  Loading subject 9 from BNCI2014_009
+2026-06-06 17:12:13  INFO      framework.dataset_registry  Loading subject 10 from BNCI2014_009
+2026-06-06 17:12:14  INFO      framework.dataset_registry  BNCI2014_009: loaded 17280 samples across 10 subjects
+2026-06-06 17:12:14  INFO      framework.dataset_registry  Loading subject 1 from BI2014a
+2026-06-06 17:12:16  INFO      framework.canonical_channels  Channel mapping: 15/17 dataset channels resolved to canonical space
+2026-06-06 17:12:16  INFO      framework.preprocessing  EEGPTPreprocessor: 15 channels, source_sfreq=512 Hz -> 256 Hz, window=256 samples (1.000 s)
+2026-06-06 17:12:16  INFO      framework.dataset_registry  Loading subject 2 from BI2014a
+2026-06-06 17:12:16  INFO      framework.dataset_registry  Loading subject 3 from BI2014a
+2026-06-06 17:12:18  INFO      framework.dataset_registry  Loading subject 4 from BI2014a
+2026-06-06 17:12:19  INFO      framework.dataset_registry  Loading subject 5 from BI2014a
+2026-06-06 17:12:20  INFO      framework.dataset_registry  Loading subject 6 from BI2014a
+2026-06-06 17:12:20  INFO      framework.dataset_registry  Loading subject 7 from BI2014a
+2026-06-06 17:12:22  INFO      framework.dataset_registry  Loading subject 8 from BI2014a
+2026-06-06 17:12:22  INFO      framework.dataset_registry  Loading subject 9 from BI2014a
+2026-06-06 17:12:24  INFO      framework.dataset_registry  Loading subject 10 from BI2014a
+2026-06-06 17:12:25  INFO      framework.dataset_registry  Loading subject 11 from BI2014a
+2026-06-06 17:12:25  INFO      framework.dataset_registry  Loading subject 12 from BI2014a
+2026-06-06 17:12:26  INFO      framework.dataset_registry  Loading subject 13 from BI2014a
+2026-06-06 17:12:27  INFO      framework.dataset_registry  Loading subject 14 from BI2014a
+2026-06-06 17:12:28  INFO      framework.dataset_registry  Loading subject 15 from BI2014a
+2026-06-06 17:12:29  INFO      framework.dataset_registry  Loading subject 16 from BI2014a
+2026-06-06 17:12:30  INFO      framework.dataset_registry  Loading subject 17 from BI2014a
+2026-06-06 17:12:31  INFO      framework.dataset_registry  Loading subject 18 from BI2014a
+2026-06-06 17:12:32  INFO      framework.dataset_registry  Loading subject 19 from BI2014a
+2026-06-06 17:12:33  INFO      framework.dataset_registry  Loading subject 20 from BI2014a
+2026-06-06 17:12:33  INFO      framework.dataset_registry  Loading subject 21 from BI2014a
+2026-06-06 17:12:35  INFO      framework.dataset_registry  Loading subject 22 from BI2014a
+2026-06-06 17:12:35  INFO      framework.dataset_registry  Loading subject 23 from BI2014a
+2026-06-06 17:12:36  INFO      framework.dataset_registry  Loading subject 24 from BI2014a
+2026-06-06 17:12:37  INFO      framework.dataset_registry  Loading subject 25 from BI2014a
+2026-06-06 17:12:38  INFO      framework.dataset_registry  Loading subject 26 from BI2014a
+2026-06-06 17:12:39  INFO      framework.dataset_registry  Loading subject 27 from BI2014a
+2026-06-06 17:12:40  INFO      framework.dataset_registry  Loading subject 28 from BI2014a
+2026-06-06 17:12:41  INFO      framework.dataset_registry  Loading subject 29 from BI2014a
+2026-06-06 17:12:42  INFO      framework.dataset_registry  Loading subject 30 from BI2014a
+2026-06-06 17:12:43  INFO      framework.dataset_registry  Loading subject 31 from BI2014a
+2026-06-06 17:12:45  INFO      framework.dataset_registry  Loading subject 32 from BI2014a
+2026-06-06 17:12:46  INFO      framework.dataset_registry  Loading subject 33 from BI2014a
+2026-06-06 17:12:47  INFO      framework.dataset_registry  Loading subject 34 from BI2014a
+2026-06-06 17:12:48  INFO      framework.dataset_registry  Loading subject 35 from BI2014a
+2026-06-06 17:12:49  INFO      framework.dataset_registry  Loading subject 36 from BI2014a
+2026-06-06 17:12:50  INFO      framework.dataset_registry  Loading subject 37 from BI2014a
+2026-06-06 17:12:51  INFO      framework.dataset_registry  Loading subject 38 from BI2014a
+2026-06-06 17:12:52  INFO      framework.dataset_registry  Loading subject 39 from BI2014a
+2026-06-06 17:12:53  INFO      framework.dataset_registry  Loading subject 40 from BI2014a
+2026-06-06 17:12:54  INFO      framework.dataset_registry  Loading subject 41 from BI2014a
+2026-06-06 17:12:55  INFO      framework.dataset_registry  Loading subject 42 from BI2014a
+2026-06-06 17:12:56  INFO      framework.dataset_registry  Loading subject 43 from BI2014a
+2026-06-06 17:12:57  INFO      framework.dataset_registry  Loading subject 44 from BI2014a
+2026-06-06 17:12:58  INFO      framework.dataset_registry  Loading subject 45 from BI2014a
+2026-06-06 17:12:59  INFO      framework.dataset_registry  Loading subject 46 from BI2014a
+2026-06-06 17:13:00  INFO      framework.dataset_registry  Loading subject 47 from BI2014a
+2026-06-06 17:13:01  INFO      framework.dataset_registry  Loading subject 48 from BI2014a
+2026-06-06 17:13:03  INFO      framework.dataset_registry  Loading subject 49 from BI2014a
+2026-06-06 17:13:04  INFO      framework.dataset_registry  Loading subject 50 from BI2014a
+2026-06-06 17:13:06  INFO      framework.dataset_registry  Loading subject 51 from BI2014a
+2026-06-06 17:13:07  INFO      framework.dataset_registry  Loading subject 52 from BI2014a
+2026-06-06 17:13:08  INFO      framework.dataset_registry  Loading subject 53 from BI2014a
+2026-06-06 17:13:09  INFO      framework.dataset_registry  Loading subject 54 from BI2014a
+2026-06-06 17:13:10  INFO      framework.dataset_registry  Loading subject 55 from BI2014a
+2026-06-06 17:13:12  INFO      framework.dataset_registry  Loading subject 56 from BI2014a
+2026-06-06 17:13:13  INFO      framework.dataset_registry  Loading subject 57 from BI2014a
+2026-06-06 17:13:14  INFO      framework.dataset_registry  Loading subject 58 from BI2014a
+2026-06-06 17:13:15  INFO      framework.dataset_registry  Loading subject 59 from BI2014a
+2026-06-06 17:13:16  INFO      framework.dataset_registry  Loading subject 60 from BI2014a
+2026-06-06 17:13:17  INFO      framework.dataset_registry  Loading subject 61 from BI2014a
+2026-06-06 17:13:18  INFO      framework.dataset_registry  Loading subject 62 from BI2014a
+2026-06-06 17:13:20  INFO      framework.dataset_registry  Loading subject 63 from BI2014a
+2026-06-06 17:13:20  INFO      framework.dataset_registry  Loading subject 64 from BI2014a
+2026-06-06 17:13:22  INFO      framework.dataset_registry  BI2014a: loaded 60993 samples across 64 subjects
+2026-06-06 17:13:22  INFO      framework.dataset_registry  Loading subject 1 from BI2013a
+2026-06-06 17:33:12  INFO      framework.canonical_channels  Channel mapping: 15/17 dataset channels resolved to canonical space
+2026-06-06 17:33:12  INFO      framework.preprocessing  EEGPTPreprocessor: 15 channels, source_sfreq=512 Hz -> 256 Hz, window=256 samples (1.000 s)
+2026-06-06 17:33:12  INFO      framework.dataset_registry  Loading subject 2 from BI2013a
+2026-06-06 17:46:41  INFO      framework.dataset_registry  Loading subject 3 from BI2013a
+2026-06-06 18:02:23  INFO      framework.dataset_registry  Loading subject 4 from BI2013a
+2026-06-06 18:17:20  INFO      framework.dataset_registry  Loading subject 5 from BI2013a
+2026-06-06 18:32:18  INFO      framework.dataset_registry  Loading subject 6 from BI2013a
+2026-06-06 18:50:39  INFO      framework.dataset_registry  Loading subject 7 from BI2013a
+2026-06-06 19:04:07  INFO      framework.dataset_registry  Loading subject 8 from BI2013a
+2026-06-06 19:05:50  INFO      framework.dataset_registry  Loading subject 9 from BI2013a
+2026-06-06 19:07:13  INFO      framework.dataset_registry  Loading subject 10 from BI2013a
+2026-06-06 19:08:53  INFO      framework.dataset_registry  Loading subject 11 from BI2013a
+2026-06-06 19:10:32  INFO      framework.dataset_registry  Loading subject 12 from BI2013a
+2026-06-06 19:12:14  INFO      framework.dataset_registry  Loading subject 13 from BI2013a
+2026-06-06 19:13:55  INFO      framework.dataset_registry  Loading subject 14 from BI2013a
+2026-06-06 19:15:26  INFO      framework.dataset_registry  Loading subject 15 from BI2013a
+2026-06-06 19:17:09  INFO      framework.dataset_registry  Loading subject 16 from BI2013a
+2026-06-06 19:18:59  INFO      framework.dataset_registry  Loading subject 17 from BI2013a
+2026-06-06 19:20:34  INFO      framework.dataset_registry  Loading subject 18 from BI2013a
+2026-06-06 19:22:02  INFO      framework.dataset_registry  Loading subject 19 from BI2013a
+2026-06-06 19:24:14  INFO      framework.dataset_registry  Loading subject 20 from BI2013a
+2026-06-06 19:25:49  INFO      framework.dataset_registry  Loading subject 21 from BI2013a
+2026-06-06 19:27:49  INFO      framework.dataset_registry  Loading subject 22 from BI2013a
+2026-06-06 19:29:44  INFO      framework.dataset_registry  Loading subject 23 from BI2013a
+2026-06-06 19:31:55  INFO      framework.dataset_registry  Loading subject 24 from BI2013a
+2026-06-06 19:33:40  INFO      framework.dataset_registry  BI2013a: loaded 34997 samples across 24 subjects
+2026-06-06 19:34:27  INFO      __main__  Dataset loaded: 44929 samples, n_channels=5, n_timepoints=256
+2026-06-06 19:34:27  INFO      __main__  Manifest saved to results3\eegnet_p300_loso\logs\manifest.json
+2026-06-06 19:34:27  INFO      training.loso_runner  GPU not available -- using CPU
+2026-06-06 19:34:27  INFO      training.loso_runner  ============================================================
+2026-06-06 19:34:27  INFO      training.loso_runner  LOSO fold 1/4 -- held-out subject: 16 (dataset: BI2013a)
+2026-06-06 19:34:27  INFO      training.loso_runner  Subject 16 [BI2013a]: 44878 train samples, 51 test samples
+2026-06-06 19:39:11  INFO      training.trainer  Epoch 1/5 — train_loss: 0.6902  val_loss: 0.6475
+2026-06-06 19:43:51  INFO      training.trainer  Epoch 2/5 — train_loss: 0.6765  val_loss: 0.6745
+2026-06-06 19:48:38  INFO      training.trainer  Epoch 3/5 — train_loss: 0.6712  val_loss: 0.6493
+2026-06-06 19:53:33  INFO      training.trainer  Epoch 4/5 — train_loss: 0.6700  val_loss: 0.6484
+2026-06-06 19:58:42  INFO      training.trainer  Epoch 5/5 — train_loss: 0.6663  val_loss: 0.6270
+2026-06-06 19:58:42  INFO      training.trainer  Checkpoint saved to results3\eegnet_p300_loso\checkpoints\subject_BI2013a_16.pt
+2026-06-06 19:58:42  INFO      evaluation.metrics  Evaluation — acc: 0.6863  bal_acc: 0.6682  f1: 0.6222  auc: 0.7250  n=51
+2026-06-06 19:59:19  INFO      evaluation.metrics  Evaluation — acc: 0.6610  bal_acc: 0.6034  f1: 0.5202  auc: 0.6511  n=44878
+2026-06-06 19:59:19  INFO      training.loso_runner  Subject result saved to results3\eegnet_p300_loso\logs\subject_BI2013a_16.json
+2026-06-06 19:59:19  INFO      training.loso_runner  ============================================================
+2026-06-06 19:59:19  INFO      training.loso_runner  LOSO fold 2/4 -- held-out subject: 16 (dataset: BI2014a)
+2026-06-06 19:59:19  INFO      training.loso_runner  Subject 16 [BI2014a]: 44862 train samples, 67 test samples
+2026-06-06 20:04:12  INFO      training.trainer  Epoch 1/5 — train_loss: 0.6909  val_loss: 0.6619
+2026-06-06 20:08:56  INFO      training.trainer  Epoch 2/5 — train_loss: 0.6764  val_loss: 0.6812
+2026-06-06 20:14:20  INFO      training.trainer  Epoch 3/5 — train_loss: 0.6736  val_loss: 0.6810
+2026-06-06 20:19:18  INFO      training.trainer  Epoch 4/5 — train_loss: 0.6693  val_loss: 0.6896
+2026-06-06 20:23:56  INFO      training.trainer  Epoch 5/5 — train_loss: 0.6694  val_loss: 0.6819
+2026-06-06 20:23:56  INFO      training.trainer  Checkpoint saved to results3\eegnet_p300_loso\checkpoints\subject_BI2014a_16.pt
+2026-06-06 20:23:56  INFO      evaluation.metrics  Evaluation — acc: 0.6269  bal_acc: 0.6043  f1: 0.5818  auc: 0.6497  n=67
+2026-06-06 20:24:35  INFO      evaluation.metrics  Evaluation — acc: 0.7244  bal_acc: 0.5992  f1: 0.5470  auc: 0.6493  n=44862
+2026-06-06 20:24:35  INFO      training.loso_runner  Subject result saved to results3\eegnet_p300_loso\logs\subject_BI2014a_16.json
+2026-06-06 20:24:35  INFO      training.loso_runner  ============================================================
+2026-06-06 20:24:35  INFO      training.loso_runner  LOSO fold 3/4 -- held-out subject: 5 (dataset: BNCI2014_009)
+2026-06-06 20:24:35  INFO      training.loso_runner  Subject 5 [BNCI2014_009]: 44773 train samples, 156 test samples
+2026-06-06 20:30:22  INFO      training.trainer  Epoch 1/5 — train_loss: 0.6900  val_loss: 0.6444
+2026-06-06 20:36:29  INFO      training.trainer  Epoch 2/5 — train_loss: 0.6764  val_loss: 0.6476
+2026-06-06 20:42:39  INFO      training.trainer  Epoch 3/5 — train_loss: 0.6740  val_loss: 0.6343
+2026-06-06 20:48:47  INFO      training.trainer  Epoch 4/5 — train_loss: 0.6724  val_loss: 0.6153
+2026-06-06 20:54:48  INFO      training.trainer  Epoch 5/5 — train_loss: 0.6696  val_loss: 0.6278
+2026-06-06 20:54:48  INFO      training.trainer  Checkpoint saved to results3\eegnet_p300_loso\checkpoints\subject_BNCI2014_009_5.pt
+2026-06-06 20:54:48  INFO      evaluation.metrics  Evaluation — acc: 0.7628  bal_acc: 0.6015  f1: 0.6029  auc: 0.6212  n=156
+2026-06-06 20:55:34  INFO      evaluation.metrics  Evaluation — acc: 0.7050  bal_acc: 0.6049  f1: 0.5409  auc: 0.6489  n=44773
+2026-06-06 20:55:34  INFO      training.loso_runner  Subject result saved to results3\eegnet_p300_loso\logs\subject_BNCI2014_009_5.json
+2026-06-06 20:55:34  INFO      training.loso_runner  ============================================================
+2026-06-06 20:55:34  INFO      training.loso_runner  LOSO fold 4/4 -- held-out subject: 5 (dataset: Mainsah2025_A)
+2026-06-06 20:55:34  INFO      training.loso_runner  Subject 5 [Mainsah2025_A]: 42395 train samples, 2534 test samples
+2026-06-06 21:01:20  INFO      training.trainer  Epoch 1/5 — train_loss: 0.6875  val_loss: 0.7259
+2026-06-06 21:07:05  INFO      training.trainer  Epoch 2/5 — train_loss: 0.6790  val_loss: 0.7177
+2026-06-06 21:13:00  INFO      training.trainer  Epoch 3/5 — train_loss: 0.6721  val_loss: 0.7088
+2026-06-06 21:18:55  INFO      training.trainer  Epoch 4/5 — train_loss: 0.6718  val_loss: 0.7280
+2026-06-06 21:24:02  INFO      training.trainer  Epoch 5/5 — train_loss: 0.6691  val_loss: 0.7765
+2026-06-06 21:24:02  INFO      training.trainer  Checkpoint saved to results3\eegnet_p300_loso\checkpoints\subject_Mainsah2025_A_5.pt
+2026-06-06 21:24:07  INFO      evaluation.metrics  Evaluation — acc: 0.3650  bal_acc: 0.5638  f1: 0.3370  auc: 0.6119  n=2534
+2026-06-06 21:24:51  INFO      evaluation.metrics  Evaluation — acc: 0.3364  bal_acc: 0.5705  f1: 0.3236  auc: 0.6525  n=42395
+2026-06-06 21:24:51  INFO      training.loso_runner  Subject result saved to results3\eegnet_p300_loso\logs\subject_Mainsah2025_A_5.json
+2026-06-06 21:24:51  INFO      training.loso_runner  LOSO summary saved to results3\eegnet_p300_loso\logs\loso_summary.json
+2026-06-06 21:24:51  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\loso_metrics_overview.png
+2026-06-06 21:24:51  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\balanced_accuracy_detail.png
+2026-06-06 21:24:51  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\confusion_matrices.png
+2026-06-06 21:24:52  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\aggregate_radar.png
+2026-06-06 21:24:52  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\metric_distributions.png
+2026-06-06 21:24:52  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\subject_metric_heatmap.png
+2026-06-06 21:24:52  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\roc_curves.png
+2026-06-06 21:24:53  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\precision_recall_curves.png
+2026-06-06 21:24:53  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\calibration_curves.png
+2026-06-06 21:24:54  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\training_curves.png
+2026-06-06 21:24:54  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\training_curves_summary.png
+2026-06-06 21:24:54  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\generalization_gap.png
+2026-06-06 21:24:55  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\error_analysis.png
+2026-06-06 21:24:55  INFO      evaluation.analytics  Saved results3\eegnet_p300_loso\logs\cumulative_performance.png
+2026-06-06 21:24:55  INFO      evaluation.analytics  Results CSV written to results3\eegnet_p300_loso\logs\loso_results.csv
+2026-06-06 21:24:55  INFO      __main__  Experiment complete.  Results in: results3\eegnet_p300_loso

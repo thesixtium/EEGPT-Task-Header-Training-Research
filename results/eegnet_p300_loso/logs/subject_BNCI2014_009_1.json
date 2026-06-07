@@ -1,0 +1,33 @@
+{
+  "subject_id": 1,
+  "dataset_id": "BNCI2014_009",
+  "metrics": {
+    "accuracy": 0.7225433526011561,
+    "balanced_accuracy": 0.6908798758865249,
+    "precision": 0.6302555958862675,
+    "recall": 0.6908798758865249,
+    "f1_macro": 0.6369518646439033,
+    "roc_auc": 0.6995789007092198,
+    "confusion_matrix": [
+      [
+        41,
+        23
+      ],
+      [
+        73,
+        209
+      ]
+    ],
+    "n_samples": 346
+  },
+  "train_metrics": {
+    "accuracy": 0.5701593937810295,
+    "balanced_accuracy": 0.6296054702574532,
+    "precision": 0.5718618259353375,
+    "recall": 0.6296054702574532,
+    "f1_macro": 0.5171995524094516,
+    "roc_auc": 0.6805227444816464,
+    "n_samples": 15308
+  },
+  "checkpoint_path": "results\\eegnet_p300_loso\\checkpoints\\subject_BNCI2014_009_1.pt"
+}

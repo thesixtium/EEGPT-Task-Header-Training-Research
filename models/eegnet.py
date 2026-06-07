@@ -50,7 +50,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
+# https://github.com/aliasvishnu/EEGNet/blob/master/EEGNet-PyTorch.ipynb
 class EEGNet(nn.Module):
 
     def __init__(self, n_channels: int = 64, n_timepoints: int = 120) -> None:

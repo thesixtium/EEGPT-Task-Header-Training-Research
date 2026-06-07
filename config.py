@@ -9,7 +9,7 @@ Nothing else in the codebase contains magic numbers.
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Any
 
 
 @dataclass
@@ -25,8 +25,10 @@ class Config:
 
     # ── Model ─────────────────────────────────────────────────────────────
     # EEGNet expects input shaped [batch, 1, n_channels, n_timepoints].
-    # These must match your preprocessed data.
-    n_channels: int = 8      # number of EEG channels after preprocessing
+    # n_channels is set automatically after load_datasets() resolves the
+    # channel intersection across all datasets — you do not need to set it
+    # manually.
+    n_channels: int = 8      # overwritten by load_datasets()
     n_timepoints: int = 120  # time samples per trial
 
     # ── Training ──────────────────────────────────────────────────────────
@@ -39,6 +41,10 @@ class Config:
     moabb_download_dir: str = "~/mne_data"
     # Path for preprocessed .pt cache files (speeds up repeat runs).
     dataset_cache_dir: str = "data/cache"
+
+    # Fraction of each dataset to use, in (0.0, 1.0].
+    # 1.0 = use all data; 0.1 = use 10% of each dataset (stratified by class).
+    data_fraction: float = 1.0
 
     # ── Output ────────────────────────────────────────────────────────────
     output_dir: str = "results"
