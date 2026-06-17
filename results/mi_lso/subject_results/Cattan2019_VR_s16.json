@@ -1,0 +1,52 @@
+{
+  "global_subject_id": 247,
+  "subject_label": "Cattan2019_VR:s16",
+  "stage_results": [
+    {
+      "stage": 0,
+      "session_id": null,
+      "metrics": {
+        "valid_accuracy": 0.8203389830508474,
+        "valid_balanced_accuracy": 0.5236284001844168,
+        "valid_f1_weighted": 0.7540234287720642,
+        "valid_f1_macro": 0.5009416195856874,
+        "valid_f1_micro": 0.8203389830508474,
+        "valid_mcc": 0.1415747206804472,
+        "valid_cohen_kappa": 0.07293210791580185
+      }
+    },
+    {
+      "stage": 1,
+      "session_id": 1,
+      "metrics": {
+        "valid_accuracy": 0.8203389830508474,
+        "valid_balanced_accuracy": 0.5092592592592593,
+        "valid_f1_weighted": 0.742674135622021,
+        "valid_f1_macro": 0.4686491079014444,
+        "valid_f1_micro": 0.8203389830508474,
+        "valid_mcc": 0.12320773568460336,
+        "valid_cohen_kappa": 0.029906310107340017
+      }
+    }
+  ],
+  "zero_shot_metrics": {
+    "valid_accuracy": 0.8203389830508474,
+    "valid_balanced_accuracy": 0.5236284001844168,
+    "valid_f1_weighted": 0.7540234287720642,
+    "valid_f1_macro": 0.5009416195856874,
+    "valid_f1_micro": 0.8203389830508474,
+    "valid_mcc": 0.1415747206804472,
+    "valid_cohen_kappa": 0.07293210791580185
+  },
+  "best_adapted_metrics": {
+    "valid_accuracy": 0.8203389830508474,
+    "valid_balanced_accuracy": 0.5092592592592593,
+    "valid_f1_weighted": 0.742674135622021,
+    "valid_f1_macro": 0.4686491079014444,
+    "valid_f1_micro": 0.8203389830508474,
+    "valid_mcc": 0.12320773568460336,
+    "valid_cohen_kappa": 0.029906310107340017
+  },
+  "n_adapt_sessions": 1,
+  "n_test_trials": 295
+}

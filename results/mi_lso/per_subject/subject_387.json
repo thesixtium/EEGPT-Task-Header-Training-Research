@@ -1,0 +1,19 @@
+{
+  "subject_id": 387,
+  "stages": [
+    {
+      "stage": 0,
+      "n_adaptation_sessions": 1,
+      "metrics": {
+        "valid_accuracy": 0.465625,
+        "valid_balanced_accuracy": 0.5104166666666666,
+        "valid_f1_weighted": 0.49605386028858034,
+        "valid_f1_macro": 0.4505527607916378,
+        "valid_f1_micro": 0.465625,
+        "valid_mcc": 0.018304705803888204,
+        "valid_cohen_kappa": 0.014409221902017322
+      },
+      "checkpoint_path": null
+    }
+  ]
+}
