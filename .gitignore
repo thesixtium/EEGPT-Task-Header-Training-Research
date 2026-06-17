@@ -14,3 +14,5 @@ src/bciciv2b_all.csv
 /C-
 /src/data
 src/lib/checkpoints/eegpt_mcae_58chs_4s_large4E.ckpt
+src/*.out
+src/*.err

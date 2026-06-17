@@ -892,6 +892,8 @@ def train_base_model(
         [train_set],
         batch_size=cfg.batch_size,
         shuffle=True,
+        balanced=True,
+        balance_mode='dataset',
     )
     val_loader_obj = ConcatDataLoader(
         [val_set],
@@ -1055,7 +1057,8 @@ def run_subject_fold(
         ) if len(adapt_data) > 5 else (adapt_data, adapt_data, adapt_data)
 
         adapt_train_loader = ConcatDataLoader(
-            [adapt_train], batch_size=min(cfg.batch_size, len(adapt_train)), shuffle=True
+            [adapt_train], batch_size=min(cfg.batch_size, len(adapt_train)), shuffle=True,
+            balanced=True, balance_mode='class',
         )
         adapt_val_loader = ConcatDataLoader(
             [adapt_val], batch_size=cfg.batch_size, shuffle=False
@@ -1273,7 +1276,8 @@ def run_experiment(cfg: ExperimentConfig) -> None:
         train_set, val_set, test_set = train_val_test_split(joint)
 
         train_loader_obj = ConcatDataLoader(
-            [train_set], batch_size=cfg.batch_size, shuffle=True
+            [train_set], batch_size=cfg.batch_size, shuffle=True,
+            balanced=True, balance_mode='dataset',
         )
         val_loader_obj = ConcatDataLoader(
             [val_set], batch_size=cfg.batch_size, shuffle=False
