@@ -1,0 +1,65 @@
+{
+  "global_subject_id": 7,
+  "subject_label": "BNCI2014_009:s7",
+  "stage_results": [
+    {
+      "stage": 0,
+      "session_id": null,
+      "metrics": {
+        "valid_accuracy": 0.6892361111111112,
+        "valid_balanced_accuracy": 0.5802083333333333,
+        "valid_f1_weighted": 0.7177734445371624,
+        "valid_f1_macro": 0.5542161902744209,
+        "valid_f1_micro": 0.6892361111111112,
+        "valid_mcc": 0.1327201595099841,
+        "valid_cohen_kappa": 0.12540716612377856
+      }
+    },
+    {
+      "stage": 1,
+      "session_id": 1,
+      "metrics": {
+        "valid_accuracy": 0.7795138888888888,
+        "valid_balanced_accuracy": 0.5802083333333333,
+        "valid_f1_weighted": 0.7740629261474092,
+        "valid_f1_macro": 0.5837747722630312,
+        "valid_f1_micro": 0.7795138888888888,
+        "valid_mcc": 0.16856038481961863,
+        "valid_cohen_kappa": 0.16812227074235808
+      }
+    },
+    {
+      "stage": 2,
+      "session_id": 2,
+      "metrics": {
+        "valid_accuracy": 0.7517361111111112,
+        "valid_balanced_accuracy": 0.5885416666666667,
+        "valid_f1_weighted": 0.7595951703224126,
+        "valid_f1_macro": 0.5820728916671318,
+        "valid_f1_micro": 0.7517361111111112,
+        "valid_mcc": 0.16618973920101038,
+        "valid_cohen_kappa": 0.16536964980544755
+      }
+    }
+  ],
+  "zero_shot_metrics": {
+    "valid_accuracy": 0.6892361111111112,
+    "valid_balanced_accuracy": 0.5802083333333333,
+    "valid_f1_weighted": 0.7177734445371624,
+    "valid_f1_macro": 0.5542161902744209,
+    "valid_f1_micro": 0.6892361111111112,
+    "valid_mcc": 0.1327201595099841,
+    "valid_cohen_kappa": 0.12540716612377856
+  },
+  "best_adapted_metrics": {
+    "valid_accuracy": 0.7517361111111112,
+    "valid_balanced_accuracy": 0.5885416666666667,
+    "valid_f1_weighted": 0.7595951703224126,
+    "valid_f1_macro": 0.5820728916671318,
+    "valid_f1_micro": 0.7517361111111112,
+    "valid_mcc": 0.16618973920101038,
+    "valid_cohen_kappa": 0.16536964980544755
+  },
+  "n_adapt_sessions": 2,
+  "n_test_trials": 576
+}

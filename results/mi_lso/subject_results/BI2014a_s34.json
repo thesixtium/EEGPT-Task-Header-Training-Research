@@ -1,0 +1,31 @@
+{
+  "global_subject_id": 44,
+  "subject_label": "BI2014a:s34",
+  "stage_results": [
+    {
+      "stage": 0,
+      "session_id": null,
+      "metrics": {
+        "valid_accuracy": 0.6407657657657657,
+        "valid_balanced_accuracy": 0.6277027027027027,
+        "valid_f1_weighted": 0.6852833832635252,
+        "valid_f1_macro": 0.5554586071124238,
+        "valid_f1_micro": 0.6407657657657657,
+        "valid_mcc": 0.1946866180395082,
+        "valid_cohen_kappa": 0.16492146596858637
+      }
+    }
+  ],
+  "zero_shot_metrics": {
+    "valid_accuracy": 0.6407657657657657,
+    "valid_balanced_accuracy": 0.6277027027027027,
+    "valid_f1_weighted": 0.6852833832635252,
+    "valid_f1_macro": 0.5554586071124238,
+    "valid_f1_micro": 0.6407657657657657,
+    "valid_mcc": 0.1946866180395082,
+    "valid_cohen_kappa": 0.16492146596858637
+  },
+  "best_adapted_metrics": {},
+  "n_adapt_sessions": 0,
+  "n_test_trials": 888
+}
