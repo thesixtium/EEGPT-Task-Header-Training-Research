@@ -229,6 +229,15 @@ echo "Job 3: $JOB3"
 
 JOB4=$(sbatch --parsable --dependency=afterok:$JOB3 run_mi_experiment.slurm)
 echo "Job 4: $JOB4"
+
+for i in 1 2 3 4 5 6 7 8 9; do
+  J=$(sbatch --parsable run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+done
 ```
 
 `afterok` means Job 2 only starts if Job 1 finishes successfully (exit code 0).

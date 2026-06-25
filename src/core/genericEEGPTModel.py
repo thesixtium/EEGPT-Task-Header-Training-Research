@@ -64,10 +64,22 @@ class GenericEEGPTModel( pl.LightningModule ):
         self.target_encoder.eval()
 
         self.chan_conv = Conv1dWithConstraint(self.chans_num, self.chans_num, 1, max_norm=1)
-        self.linear_probe1 = LinearWithConstraint(2048, 16, max_norm=1)
-        self.linear_probe2 = LinearWithConstraint(16 * 16, output_classes, max_norm=0.25)
 
-        self.drop = torch.nn.Dropout(p=0.50)
+        # Original task head (commented out)
+        # self.linear_probe1 = LinearWithConstraint(2048, 16, max_norm=1)
+        # self.linear_probe2 = LinearWithConstraint(16 * 16, output_classes, max_norm=0.25)
+        # self.drop = torch.nn.Dropout(p=0.50)
+
+        # Three-layer FC head operating on the globally-flattened encoder output.
+        # Encoder produces [B, N=16, embed_num=4, embed_dim=512] → flatten → [B, 32768]
+        self.fc1 = LinearWithConstraint(16 * 4 * 512, 512, max_norm=1)
+        self.fc2 = LinearWithConstraint(512, 128, max_norm=1)
+        self.fc3 = LinearWithConstraint(128, output_classes, max_norm=0.25)
+
+        self.act = nn.GELU()
+        self.drop1 = torch.nn.Dropout(p=0.50)
+        self.drop2 = torch.nn.Dropout(p=0.50)
+        self.drop3 = torch.nn.Dropout(p=0.50)
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
         self.running_scores = {"train": [], "valid": [], "test": []}
@@ -81,13 +93,23 @@ class GenericEEGPTModel( pl.LightningModule ):
 
         z = self.target_encoder(x, self.chans_id.to(x))
 
-        h = z.flatten(2)
+        # Original forward (commented out)
+        # h = z.flatten(2)
+        # h = self.linear_probe1(self.drop(h))
+        # h = h.flatten(1)
+        # h = self.linear_probe2(h)
 
-        h = self.linear_probe1(self.drop(h))
+        # Flatten all patch and embed dims into a single feature vector per sample
+        h = z.flatten(1)                    # [B, N*embed_num*embed_dim] = [B, 32768]
 
-        h = h.flatten(1)
+        h = self.drop1(h)
+        h = self.act(self.fc1(h))           # [B, 512]
 
-        h = self.linear_probe2(h)
+        h = self.drop2(h)
+        h = self.act(self.fc2(h))           # [B, 128]
+
+        h = self.drop3(h)
+        h = self.fc3(h)                     # [B, output_classes]
 
         return x, h
 
@@ -182,8 +204,11 @@ class GenericEEGPTModel( pl.LightningModule ):
 
         optimizer = torch.optim.AdamW(
             list(self.chan_conv.parameters()) +
-            list(self.linear_probe1.parameters()) +
-            list(self.linear_probe2.parameters()),
+            # list(self.linear_probe1.parameters()) +
+            # list(self.linear_probe2.parameters()),
+            list(self.fc1.parameters()) +
+            list(self.fc2.parameters()) +
+            list(self.fc3.parameters()),
             weight_decay=0.01)  #
 
         lr_scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=self.max_lr,
