@@ -1,0 +1,33 @@
+{
+  "subject_id": 247,
+  "stages": [
+    {
+      "stage": 0,
+      "n_adaptation_sessions": 1,
+      "metrics": {
+        "valid_accuracy": 0.6779661016949152,
+        "valid_balanced_accuracy": 0.551444598125096,
+        "valid_f1_weighted": 0.6994240784991073,
+        "valid_f1_macro": 0.5389184120037511,
+        "valid_f1_micro": 0.6779661016949152,
+        "valid_mcc": 0.089853449528176,
+        "valid_cohen_kappa": 0.0872227469628376
+      },
+      "checkpoint_path": null
+    },
+    {
+      "stage": 1,
+      "n_adaptation_sessions": 1,
+      "metrics": {
+        "valid_accuracy": 0.18305084745762712,
+        "valid_balanced_accuracy": 0.5,
+        "valid_f1_weighted": 0.056646107522704096,
+        "valid_f1_macro": 0.15472779369627507,
+        "valid_f1_micro": 0.18305084745762712,
+        "valid_mcc": 0.0,
+        "valid_cohen_kappa": 0.0
+      },
+      "checkpoint_path": null
+    }
+  ]
+}

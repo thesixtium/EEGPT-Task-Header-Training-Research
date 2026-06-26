@@ -1,0 +1,31 @@
+{
+  "global_subject_id": 493,
+  "subject_label": "ErpCore2021_N400:s33",
+  "stage_results": [
+    {
+      "stage": 0,
+      "session_id": null,
+      "metrics": {
+        "valid_accuracy": 0.45,
+        "valid_balanced_accuracy": 0.44999999999999996,
+        "valid_f1_weighted": 0.43734015345268545,
+        "valid_f1_macro": 0.4373401534526854,
+        "valid_f1_micro": 0.45,
+        "valid_mcc": -0.10482848367219183,
+        "valid_cohen_kappa": -0.10000000000000009
+      }
+    }
+  ],
+  "zero_shot_metrics": {
+    "valid_accuracy": 0.45,
+    "valid_balanced_accuracy": 0.44999999999999996,
+    "valid_f1_weighted": 0.43734015345268545,
+    "valid_f1_macro": 0.4373401534526854,
+    "valid_f1_micro": 0.45,
+    "valid_mcc": -0.10482848367219183,
+    "valid_cohen_kappa": -0.10000000000000009
+  },
+  "best_adapted_metrics": {},
+  "n_adapt_sessions": 0,
+  "n_test_trials": 120
+}

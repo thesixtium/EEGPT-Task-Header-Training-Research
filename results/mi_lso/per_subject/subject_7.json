@@ -1,0 +1,47 @@
+{
+  "subject_id": 7,
+  "stages": [
+    {
+      "stage": 0,
+      "n_adaptation_sessions": 1,
+      "metrics": {
+        "valid_accuracy": 0.6805555555555556,
+        "valid_balanced_accuracy": 0.575,
+        "valid_f1_weighted": 0.7111657111657111,
+        "valid_f1_macro": 0.547911547911548,
+        "valid_f1_micro": 0.6805555555555556,
+        "valid_mcc": 0.12298800925361816,
+        "valid_cohen_kappa": 0.11538461538461542
+      },
+      "checkpoint_path": null
+    },
+    {
+      "stage": 1,
+      "n_adaptation_sessions": 1,
+      "metrics": {
+        "valid_accuracy": 0.4965277777777778,
+        "valid_balanced_accuracy": 0.4979166666666667,
+        "valid_f1_weighted": 0.5592923785945878,
+        "valid_f1_macro": 0.43505729244172675,
+        "valid_f1_micro": 0.4965277777777778,
+        "valid_mcc": -0.003105724856922486,
+        "valid_cohen_kappa": -0.0023041474654379446
+      },
+      "checkpoint_path": null
+    },
+    {
+      "stage": 2,
+      "n_adaptation_sessions": 1,
+      "metrics": {
+        "valid_accuracy": 0.4895833333333333,
+        "valid_balanced_accuracy": 0.5854166666666667,
+        "valid_f1_weighted": 0.5458711474526012,
+        "valid_f1_macro": 0.45655494653607687,
+        "valid_f1_micro": 0.4895833333333333,
+        "valid_mcc": 0.12929508665123962,
+        "valid_cohen_kappa": 0.08506224066390056
+      },
+      "checkpoint_path": null
+    }
+  ]
+}

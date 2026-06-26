@@ -1,0 +1,125 @@
+========================================================================
+  EXPERIMENT: mi_lso
+  Updated   : 2026-06-25 20:27:30
+  Elapsed   : 21h 36m 47s
+  ETA       : done
+========================================================================
+
+CONFIGURATION
+----------------------------------------
+  experiment_name: mi_lso
+  base_model_path: src/lib/checkpoints/eegpt_mcae_58chs_4s_large4E.ckpt
+  dataset_ids: ['BNCI2014_009', 'BI2014a', 'BI2013a', 'BI2014b', 'BI2015a', 'BI2015b', 'BNCI2014_008', 'Cattan2019_VR', 'EPFLP300', 'ErpCore2021_ERN', 'ErpCore2021_LRP', 'ErpCore2021_MMN', 'ErpCore2021_N170', 'ErpCore2021_N2pc', 'ErpCore2021_N400']
+  max_lr: 0.0004
+  base_epochs: 100
+  adapt_epochs: 10
+  batch_size: 32
+  lso_enabled: True
+  lso_subjects_per_test_set: 1
+  seed: 7112002
+
+CURRENT STATUS
+----------------------------------------
+  Phase     : COMPLETE
+  Phase time: 1s
+  Folds done: 15 / 15
+  Avg stage : 2s per stage
+  Avg fold  : 42s per subject
+
+DATASET INVENTORY
+----------------------------------------
+  Dataset                    Subjects  Sessions    Trials   Size (MB)  Class dist
+  --------------------------------------------------------------------------------
+  BI2013a                          24         8     34997      2050.6  cls0:5834  cls1:29163
+  BI2014a                          64         1     60993      3573.8  cls0:10166  cls1:50827
+  BI2014b                          38         1      9180      1039.9  cls0:1530  cls1:7650
+  BI2015a                          43         3     71484      8097.8  cls0:11913  cls1:59571
+  BI2015b                          44         1    116098     13151.7  cls0:21116  cls1:94982
+  BNCI2014_008                      8         1     33600      1050.0  cls0:5600  cls1:28000
+  BNCI2014_009                     10         3     17280      1080.0  cls0:2880  cls1:14400
+  Cattan2019_VR                    21         2     12447       777.9  cls0:2095  cls1:10352
+  EPFLP300                          8         4     24890      3111.2  cls0:4140  cls1:20750
+  ErpCore2021_ERN                  40         1     15971      1746.8  cls0:14180  cls1:1791
+  ErpCore2021_LRP                  40         1     15968      1746.5  cls0:7945  cls1:8023
+  ErpCore2021_MMN                  40         1     39771      4350.0  cls0:31816  cls1:7955
+  ErpCore2021_N170                 40         1     12789      1398.8  cls0:3197  cls1:9592
+  ErpCore2021_N2pc                 40         1     12804      1400.4  cls0:6401  cls1:6403
+  ErpCore2021_N400                 40         1      4798       524.8  cls0:2400  cls1:2398
+  --------------------------------------------------------------------------------
+  TOTAL                                            483070     45100.3
+
+  Held-out subjects per dataset:
+    BI2013a: subject(s) 1
+    BI2014a: subject(s) 34
+    BI2014b: subject(s) 7
+    BI2015a: subject(s) 33
+    BI2015b: subject(s) 10
+    BNCI2014_008: subject(s) 7
+    BNCI2014_009: subject(s) 7
+    Cattan2019_VR: subject(s) 16
+    EPFLP300: subject(s) 9
+    ErpCore2021_ERN: subject(s) 11
+    ErpCore2021_LRP: subject(s) 4
+    ErpCore2021_MMN: subject(s) 10
+    ErpCore2021_N170: subject(s) 7
+    ErpCore2021_N2pc: subject(s) 19
+    ErpCore2021_N400: subject(s) 33
+
+CHANNEL INTERSECTION
+----------------------------------------
+  Joint channel intersection: 5 channels
+    Retained : ['CZ', 'P3', 'PZ', 'P4', 'OZ']
+  
+    Per-dataset coverage:
+      BNCI2014_009: 16 raw channels → 5/5 intersection channels present
+      BI2014a: 15 raw channels → 5/5 intersection channels present
+      BI2013a: 15 raw channels → 5/5 intersection channels present
+      BI2014b: 29 raw channels → 5/5 intersection channels present
+      BI2015a: 29 raw channels → 5/5 intersection channels present
+      BI2015b: 29 raw channels → 5/5 intersection channels present
+      BNCI2014_008: 8 raw channels → 5/5 intersection channels present
+      Cattan2019_VR: 16 raw channels → 5/5 intersection channels present
+      EPFLP300: 32 raw channels → 5/5 intersection channels present
+      ErpCore2021_ERN: 28 raw channels → 5/5 intersection channels present
+      ErpCore2021_LRP: 28 raw channels → 5/5 intersection channels present
+      ErpCore2021_MMN: 28 raw channels → 5/5 intersection channels present
+      ErpCore2021_N170: 28 raw channels → 5/5 intersection channels present
+      ErpCore2021_N2pc: 28 raw channels → 5/5 intersection channels present
+      ErpCore2021_N400: 28 raw channels → 5/5 intersection channels present
+
+EXPERIMENT SCOPE
+----------------------------------------
+  Datasets              : BNCI2014_009, BI2014a, BI2013a, BI2014b, BI2015a, BI2015b, BNCI2014_008, Cattan2019_VR, EPFLP300, ErpCore2021_ERN, ErpCore2021_LRP, ErpCore2021_MMN, ErpCore2021_N170, ErpCore2021_N2pc, ErpCore2021_N400
+  Training subjects     : 485  (used for shared base model)
+  Held-out subjects     : 15  (zero-shot + adaptation)
+  Stages per subject    : 8  (zero-shot + 7 adaptation)
+  Base model epochs     : 100  (trained once)
+  Total adapt runs      : 120
+  Total epochs (est)    : 1150  (100 base + 15×7×10 adapt)
+
+COMPLETED SUBJECTS
+----------------------------------------
+  Subject  75 | zero-shot=0.500  best-adapted=0.500  gain=+0.000  (3m 38s)
+  Subject  44 | zero-shot=0.624  best-adapted=nan  gain=+nan  (10s)
+  Subject 105 | zero-shot=0.553  best-adapted=nan  gain=+nan  (3s)
+  Subject 169 | zero-shot=0.552  best-adapted=0.500  gain=-0.052  (1m 05s)
+  Subject 189 | zero-shot=0.573  best-adapted=nan  gain=+nan  (30s)
+  Subject 230 | zero-shot=0.530  best-adapted=nan  gain=+nan  (47s)
+  Subject   7 | zero-shot=0.575  best-adapted=0.585  gain=+0.010  (1m 13s)
+  Subject 247 | zero-shot=0.551  best-adapted=0.500  gain=-0.051  (30s)
+  Subject 260 | zero-shot=0.541  best-adapted=0.533  gain=-0.008  (1m 58s)
+  Subject 271 | zero-shot=0.498  best-adapted=nan  gain=+nan  (5s)
+  Subject 304 | zero-shot=0.483  best-adapted=nan  gain=+nan  (5s)
+  Subject 350 | zero-shot=0.537  best-adapted=nan  gain=+nan  (12s)
+  Subject 387 | zero-shot=0.483  best-adapted=nan  gain=+nan  (4s)
+  Subject 439 | zero-shot=0.534  best-adapted=nan  gain=+nan  (4s)
+  Subject 493 | zero-shot=0.450  best-adapted=nan  gain=+nan  (2s)
+
+FINAL RESULTS
+----------------------------------------
+  zero_shot_balanced_accuracy: 0.5324 ± 0.0424
+  best_adapted_balanced_accuracy: 0.5237 ± 0.0334
+  total_subjects_evaluated: 15
+  results_directory: results/mi_lso
+
+========================================================================
