@@ -24,6 +24,7 @@ echo "Directory: $(pwd)"
 # Put raw MOABB downloads on scratch (fast, auto-cleaned after 5 days)
 export MOABB_DOWNLOAD_DIR=/scratch/${SLURM_JOB_ID}/mne_data
 mkdir -p "$MOABB_DOWNLOAD_DIR"
+export MNE_DATA="$MOABB_DOWNLOAD_DIR"
 
 # Activate the virtual environment
 module load cuda/11.3.0
