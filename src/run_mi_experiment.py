@@ -35,18 +35,7 @@ mne.set_log_level("WARNING")
 logging.getLogger("moabb").setLevel(logging.WARNING)
 
 from moabb.utils import set_download_dir
-from moabb.datasets import (
-    BNCI2014_009, BI2014a, BI2013a, BI2014b, BI2015a, BI2015b, BNCI2014_008,
-    Chailloux2020, Cattan2019_VR, EPFLP300, ErpCore2021_ERN, ErpCore2021_LRP,
-    ErpCore2021_MMN, ErpCore2021_N170, ErpCore2021_N2pc, ErpCore2021_N400,
-    ErpCore2021_P3, GuttmannFlury2025_P300, Lee2019_ERP, Lee2024_AC,
-    Lee2024_BS, Lee2024_DL, Lee2024_EL, Lee2024_TV, Mainsah2025_A,
-    Mainsah2025_B, Mainsah2025_C, Mainsah2025_D, Mainsah2025_E, Mainsah2025_F,
-    Mainsah2025_G, Mainsah2025_H, Mainsah2025_I, Mainsah2025_J, Mainsah2025_K,
-    Mainsah2025_L, Mainsah2025_M, Mainsah2025_P, Mainsah2025_N, Mainsah2025_Q,
-    Mainsah2025_S1, Mainsah2025_R, Mainsah2025_S2, Speier2017, Zheng2020,
-    Mainsah2025_O, Zhang2025
-)
+from moabb.datasets import BNCI2014_001
 
 from framework.experiment_runner import ExperimentConfig, run_experiment
 from framework.label_schema import DATASET_LABEL_MAPS
@@ -88,34 +77,8 @@ cfg = ExperimentConfig(
         Path('src') / 'lib' / 'checkpoints' / 'eegpt_mcae_58chs_4s_large4E.ckpt'
     ),
 
-    # Add or remove MOABB dataset objects and their matching registry IDs.
-    # The ID must exist as a key in label_schema.py → DATASET_LABEL_MAPS.
-    datasets=[
-        BNCI2014_009(), BI2014a(), BI2013a(), BI2014b(), BI2015a(), BI2015b(), BNCI2014_008(),
-        #Chailloux2020(),
-        Cattan2019_VR(), EPFLP300(), ErpCore2021_ERN(), ErpCore2021_LRP(),
-        ErpCore2021_MMN(), ErpCore2021_N170(), ErpCore2021_N2pc(), ErpCore2021_N400(),
-    #    ErpCore2021_P3(), GuttmannFlury2025_P300(), Lee2019_ERP(), Lee2024_AC(),
-    #    Lee2024_BS(), Lee2024_DL(), Lee2024_EL(), Lee2024_TV(), Mainsah2025_A(),
-    #    Mainsah2025_B(), Mainsah2025_C(), Mainsah2025_D(), Mainsah2025_E(), Mainsah2025_F(),
-    #    Mainsah2025_G(), Mainsah2025_H(), Mainsah2025_I(), Mainsah2025_J(), Mainsah2025_K(),
-    #    Mainsah2025_L(), Mainsah2025_M(), Mainsah2025_P(), Mainsah2025_N(), Mainsah2025_Q(),
-    #    Mainsah2025_S1(), Mainsah2025_R(), Mainsah2025_S2(), Speier2017(), Zheng2020(),
-    #    Mainsah2025_O(), Zhang2025()
-    ],
-    dataset_ids=[
-        'BNCI2014_009', 'BI2014a', 'BI2013a', 'BI2014b', 'BI2015a', 'BI2015b', 'BNCI2014_008',
-        #'Chailloux2020',
-        'Cattan2019_VR', 'EPFLP300', 'ErpCore2021_ERN', 'ErpCore2021_LRP',
-        'ErpCore2021_MMN', 'ErpCore2021_N170', 'ErpCore2021_N2pc', 'ErpCore2021_N400',
-    #    'ErpCore2021_P3', 'GuttmannFlury2025_P300', 'Lee2019_ERP', 'Lee2024_AC',
-    #    'Lee2024_BS', 'Lee2024_DL', 'Lee2024_EL', 'Lee2024_TV', 'Mainsah2025_A',
-    #    'Mainsah2025_B', 'Mainsah2025_C', 'Mainsah2025_D', 'Mainsah2025_E', 'Mainsah2025_F',
-    #    'Mainsah2025_G', 'Mainsah2025_H', 'Mainsah2025_I', 'Mainsah2025_J', 'Mainsah2025_K',
-    #    'Mainsah2025_L', 'Mainsah2025_M', 'Mainsah2025_P', 'Mainsah2025_N', 'Mainsah2025_Q',
-    #    'Mainsah2025_S1', 'Mainsah2025_R', 'Mainsah2025_S2', 'Speier2017', 'Zheng2020',
-    #    'Mainsah2025_O', 'Zhang2025'
-    ],
+    datasets=[BNCI2014_001()],
+    dataset_ids=['BNCI2014_001'],
 
     max_lr=4e-4,
     base_epochs=100,

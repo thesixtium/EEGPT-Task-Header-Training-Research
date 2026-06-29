@@ -22,8 +22,10 @@ logger = logging.getLogger(__name__)
 # Global vocabulary
 # ---------------------------------------------------------------------------
 GLOBAL_LABELS: List[str] = [
-    'Target',    # 0
-    'NonTarget',   # 1
+    'left_hand',   # 2
+    'right_hand',  # 3
+    'feet',        # 4
+    'tongue',      # 5
 ]
 
 GLOBAL_LABEL_TO_IDX: Dict[str, int] = {lbl: idx for idx, lbl in enumerate(GLOBAL_LABELS)}
@@ -35,194 +37,12 @@ N_GLOBAL_CLASSES = len(GLOBAL_LABELS)
 # Keys are lowercase dataset string labels as returned by MOABB paradigm.
 # ---------------------------------------------------------------------------
 DATASET_LABEL_MAPS: Dict[str, Dict[str, str]] = {
-    'BNCI2014_009': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'BI2014a': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'BI2013a': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'BI2014b': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'BI2015a': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'BI2015b': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'BNCI2014_008': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Chailloux2020': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Cattan2019_VR': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'EPFLP300': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'ErpCore2021_ERN': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'ErpCore2021_LRP': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'ErpCore2021_MMN': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'ErpCore2021_N170': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'ErpCore2021_N2pc': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'ErpCore2021_N400': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'ErpCore2021_P3': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'GuttmannFlury2025_P300': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Lee2019_ERP': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Lee2024_AC': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Lee2024_BS': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Lee2024_DL': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Lee2024_EL': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Lee2024_TV': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_A': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_B': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_C': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_D': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_E': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_F': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_G': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_H': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_I': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_J': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_K': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_L': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_M': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_P': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_N': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_Q': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_S1': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_R': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_S2': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Speier2017': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Zheng2020': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Mainsah2025_O': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
-    'Zhang2025': {
-        'Target': 'Target',
-        'NonTarget': 'NonTarget',
-    },
+    'BNCI2014_001': {
+        'left_hand':  'left_hand',
+        'right_hand': 'right_hand',
+        'feet':       'feet',
+        'tongue':     'tongue',
+    }
 }
 
 
@@ -236,54 +56,7 @@ DATASET_LABEL_MAPS: Dict[str, Dict[str, str]] = {
 # available across all MOABB versions.
 # ---------------------------------------------------------------------------
 DATASET_SAMPLE_RATES: Dict[str, int] = {
-    'BNCI2014_009':  256,
-    'BI2014a': 512,
-    'BI2013a': 512,
-    'BI2014b': 512,
-    'BI2015a': 512,
-    'BI2015b': 512,
-    'BNCI2014_008': 256,
-    'Chailloux2020': 256,
-    'Cattan2019_VR': 512,
-    'EPFLP300': 2048,
-    'ErpCore2021_ERN': 1024,
-    'ErpCore2021_LRP': 1024,
-    'ErpCore2021_MMN': 1024,
-    'ErpCore2021_N170': 1024,
-    'ErpCore2021_N2pc': 1024,
-    'ErpCore2021_N400': 1024,
-    'ErpCore2021_P3': 1024,
-    'GuttmannFlury2025_P300': 1000,
-    'Lee2019_ERP': 1000,
-    'Lee2024_AC': 500,
-    'Lee2024_BS': 500,
-    'Lee2024_DL': 500,
-    'Lee2024_EL': 500,
-    'Lee2024_TV': 500,
-    'Mainsah2025_A': 256,
-    'Mainsah2025_B': 256,
-    'Mainsah2025_C': 256,
-    'Mainsah2025_D': 256,
-    'Mainsah2025_E': 256,
-    'Mainsah2025_F': 256,
-    'Mainsah2025_G': 256,
-    'Mainsah2025_H': 256,
-    'Mainsah2025_I': 256,
-    'Mainsah2025_J': 256,
-    'Mainsah2025_K': 256,
-    'Mainsah2025_L': 256,
-    'Mainsah2025_M': 256,
-    'Mainsah2025_P': 256,
-    'Mainsah2025_N': 256,
-    'Mainsah2025_Q': 256,
-    'Mainsah2025_S1': 256,
-    'Mainsah2025_R': 256,
-    'Mainsah2025_S2': 256,
-    'Speier2017': 256,
-    'Zheng2020': 1000,
-    'Mainsah2025_O': 256,
-    'Zhang2025': 1000
-
+    'BNCI2014_001':  250,
 }
 
 

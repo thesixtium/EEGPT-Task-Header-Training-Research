@@ -198,9 +198,9 @@ class MoabbDatasetLoader(BaseDatasetLoader):
 
         Returns a fully annotated EEGSampleDataset.
         """
-        from moabb.paradigms import P300
+        from moabb.paradigms import MotorImagery
 
-        paradigm = P300(
+        paradigm = MotorImagery(
             tmin=self._tmin,
             tmax=self._tmax,
             resample=self._resample,
