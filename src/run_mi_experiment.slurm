@@ -24,6 +24,9 @@ echo "Directory: $(pwd)"
 # Put raw MOABB downloads on scratch (fast, auto-cleaned after 5 days)
 export MOABB_DOWNLOAD_DIR=/scratch/${SLURM_JOB_ID}/mne_data
 mkdir -p "$MOABB_DOWNLOAD_DIR"
+# Always set MNE_DATA from the current job ID — never inherit a stale path
+# from a previous job whose scratch directory has already been cleaned up.
+unset MNE_DATA
 export MNE_DATA="$MOABB_DOWNLOAD_DIR"
 
 # Activate the virtual environment

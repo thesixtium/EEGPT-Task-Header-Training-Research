@@ -363,7 +363,13 @@ class MoabbDatasetLoader(BaseDatasetLoader):
     # ------------------------------------------------------------------
     def get_channel_names(self) -> List[str]:
         if self._channel_names is None:
-            raise RuntimeError("Call load_all_subjects() first to resolve channels.")
+            raise RuntimeError(
+                f"Channel names for '{self._dataset_id}' were never resolved. "
+                "load_all_subjects() was called but loaded 0 subjects — all "
+                "downloads failed.  Check that MNE_DATA and MOABB_DOWNLOAD_DIR "
+                "point to existing, writable directories (a stale path from a "
+                "previous SLURM job is the most common cause)."
+            )
         return self._channel_names
 
     def get_n_classes(self) -> int:

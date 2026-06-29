@@ -1166,6 +1166,24 @@ def run_experiment(cfg: ExperimentConfig) -> None:
         except Exception as _e:
             logger.warning("Could not set MOABB download dir from env: %s", _e)
 
+    # ── Also ensure MNE_DATA directory exists if set ──────────────────────
+    # MNE reads MNE_DATA independently of MOABB_DOWNLOAD_DIR.  If this env
+    # var points to a path from a previous SLURM job that no longer exists
+    # (e.g. /scratch/<old_job_id>/mne_data), every MOABB download attempt
+    # will fail with "Download location ... does not exist".  Creating the
+    # directory here makes the run self-healing in that case.
+    _mne_data_dir = _os.environ.get('MNE_DATA')
+    if _mne_data_dir:
+        try:
+            Path(_mne_data_dir).mkdir(parents=True, exist_ok=True)
+            logger.info("MNE_DATA directory ensured: %s", _mne_data_dir)
+        except Exception as _e:
+            logger.warning(
+                "Could not create MNE_DATA directory '%s': %s — "
+                "dataset downloads may fail if this path is stale.",
+                _mne_data_dir, _e,
+            )
+
     # ── Detect accelerator ────────────────────────────────────────────────
     if torch.cuda.is_available():
         _accelerator = 'gpu'
@@ -1238,11 +1256,26 @@ def run_experiment(cfg: ExperimentConfig) -> None:
                 did, len(dropped), dropped,
             )
 
-    assert channel_names, (
-        "No channels remain after intersecting all datasets. "
-        "Check that dataset channel names are being normalised correctly "
-        "in canonical_channels.py."
-    )
+    if not channel_names:
+        import os as _os
+        empty_datasets = [did for did, ds in dataset_map.items() if len(ds.samples) == 0]
+        if empty_datasets:
+            raise RuntimeError(
+                f"The following datasets loaded 0 samples, causing the channel "
+                f"intersection to become empty: {empty_datasets}.\n"
+                f"This is almost always a download failure.  Check that the "
+                f"directories below exist and are writable:\n"
+                f"  MNE_DATA           = {_os.environ.get('MNE_DATA', '(not set)')}\n"
+                f"  MOABB_DOWNLOAD_DIR = {_os.environ.get('MOABB_DOWNLOAD_DIR', '(not set)')}\n"
+                f"If these point to a path from a previous SLURM job that has "
+                f"since been cleaned up, unset MNE_DATA and MOABB_DOWNLOAD_DIR "
+                f"(or point them to an existing directory) and re-run."
+            )
+        raise RuntimeError(
+            "No channels remain after intersecting all datasets. "
+            "Check that dataset channel names are being normalised correctly "
+            "in canonical_channels.py."
+        )
 
     # Build a human-readable per-dataset channel report for the status log.
     ch_report_lines = [
