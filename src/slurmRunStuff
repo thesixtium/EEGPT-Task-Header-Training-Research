@@ -1,0 +1,8 @@
+for i in 1 2 3; do
+  J=$(sbatch --parsable run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+  J=$(sbatch --parsable --dependency=afterok:$J run_job.slurm)
+done
