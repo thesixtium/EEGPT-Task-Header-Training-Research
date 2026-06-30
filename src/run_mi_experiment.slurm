@@ -12,13 +12,11 @@
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=aleksander.berezowsk@ucalgary.ca
 
-# -------------------------------------------------------
-# CHANGE THE EMAIL ADDRESS ABOVE BEFORE SUBMITTING
-# -------------------------------------------------------
-
 echo "Job ID   : $SLURM_JOB_ID"
 echo "Node     : $SLURMD_NODENAME"
 echo "Started  : $(date)"
+
+cd /home/aleksander.berezowsk/EEGPT-Task-Header-Training-Research
 echo "Directory: $(pwd)"
 
 # Activate the virtual environment
@@ -40,13 +38,7 @@ export OPENBLAS_NUM_THREADS=8
 export MKL_NUM_THREADS=8
 export PYTHONUNBUFFERED=1
 
-# -------------------------------------------------------
-# Put raw MOABB downloads on scratch (fast, auto-cleaned after 5 days).
-# Set this LAST, right before launching python, so nothing sourced above
-# (module load / venv activate / profile scripts) can silently clobber it
-# with a stale value from a previous job's scratch directory.
-# -------------------------------------------------------
-
+# Set MNE_DATA last so nothing sourced above can clobber it with a stale path
 unset MNE_DATA
 unset MOABB_DOWNLOAD_DIR
 export MOABB_DOWNLOAD_DIR=/scratch/${SLURM_JOB_ID}/mne_data
@@ -54,16 +46,15 @@ export MNE_DATA="$MOABB_DOWNLOAD_DIR"
 mkdir -p "$MNE_DATA"
 rm -f ~/.mne-python/mne-python.json
 echo "MNE_DATA           = $MNE_DATA"
-echo "MOABB_DOWNLOAD_DIR  = $MOABB_DOWNLOAD_DIR"
+echo "MOABB_DOWNLOAD_DIR = $MOABB_DOWNLOAD_DIR"
 
 # Verify checkpoint exists before wasting queue time
-CKPT="lib/checkpoints/eegpt_mcae_58chs_4s_large4E.ckpt"
+CKPT="src/lib/checkpoints/eegpt_mcae_58chs_4s_large4E.ckpt"
 if [ ! -f "$CKPT" ]; then
     echo "ERROR: checkpoint not found at $CKPT - aborting."
     exit 1
 fi
 
-cd /home/aleksander.berezowsk/EEGPT-Task-Header-Training-Research
 export PYTHONPATH=$(pwd):$(pwd)/src:$PYTHONPATH
 python3 src/run_mi_experiment.py
 

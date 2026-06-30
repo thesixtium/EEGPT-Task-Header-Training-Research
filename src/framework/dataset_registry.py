@@ -112,7 +112,6 @@ class MoabbDatasetLoader(BaseDatasetLoader):
         subjects: Optional[List[int]] = None,
         dataset_index: int = 1,
         dataset_total: int = 1,
-        cache_dir: Optional[str] = None,
     ) -> None:
         self._moabb_dataset = moabb_dataset
         self._dataset_id = dataset_id
@@ -126,7 +125,6 @@ class MoabbDatasetLoader(BaseDatasetLoader):
         self._subjects = subjects
         self._dataset_index = dataset_index
         self._dataset_total = dataset_total
-        self._cache_dir = cache_dir
 
         self._channel_names: Optional[List[str]] = None   # set after first load
 
@@ -137,57 +135,6 @@ class MoabbDatasetLoader(BaseDatasetLoader):
     def _dataset_prefix(self) -> str:
         """Short string used at the start of every log line for this dataset."""
         return f"[{self._dataset_index}/{self._dataset_total}] {self._dataset_id}"
-
-    def _subject_cache_path(self, subject_id: int):
-        """
-        Return a Path for the cached .pt file for this subject, or None if
-        caching is disabled.
-        """
-        if self._cache_dir is None:
-            return None
-        from pathlib import Path
-        cache_root = Path(self._cache_dir) / self._dataset_id
-        cache_root.mkdir(parents=True, exist_ok=True)
-        return cache_root / f"subject_{subject_id:04d}.pt"
-
-    def _load_subject_from_cache(self, subject_id: int) -> Optional[List[EEGSample]]:
-        """
-        Attempt to load pre-processed samples for subject_id from disk cache.
-        Returns a list of EEGSample on hit, or None on miss.
-        """
-        path = self._subject_cache_path(subject_id)
-        if path is None or not path.exists():
-            return None
-        try:
-            samples = torch.load(path, weights_only=False)
-            logger.info(
-                "%s — subject %s  →  loaded %d samples from cache  (%s)",
-                self._dataset_prefix(), subject_id, len(samples), path,
-            )
-            return samples
-        except Exception as exc:
-            logger.warning(
-                "%s — subject %s  cache read failed (%s), will re-process",
-                self._dataset_prefix(), subject_id, exc,
-            )
-            return None
-
-    def _save_subject_to_cache(self, subject_id: int, samples: List[EEGSample]) -> None:
-        """Persist processed samples to disk cache (silently skips if disabled)."""
-        path = self._subject_cache_path(subject_id)
-        if path is None:
-            return
-        try:
-            torch.save(samples, path)
-            logger.info(
-                "%s — subject %s  →  cached %d samples  →  %s",
-                self._dataset_prefix(), subject_id, len(samples), path,
-            )
-        except Exception as exc:
-            logger.warning(
-                "%s — subject %s  cache write failed: %s",
-                self._dataset_prefix(), subject_id, exc,
-            )
 
     # ------------------------------------------------------------------
     def load_all_subjects(self) -> EEGSampleDataset:
@@ -227,23 +174,6 @@ class MoabbDatasetLoader(BaseDatasetLoader):
             logger.info(
                 "%s — subject %d/%d  (id=%s)",
                 self._dataset_prefix(), subj_idx, n_subjects, subject_id,
-            )
-
-            # ---------------------------------------------------------------
-            # Cache check — skip download + preprocessing if already on disk
-            # ---------------------------------------------------------------
-            cached = self._load_subject_from_cache(subject_id)
-            if cached is not None:
-                all_samples.extend(cached)
-                # Still need channel names for the dataset object; grab from
-                # the first cached sample if preprocessor not yet built.
-                if self._channel_names is None and cached:
-                    self._channel_names = list(cached[0].channel_names)
-                continue
-
-            logger.info(
-                "%s — subject %d/%d  →  not cached, downloading / preprocessing",
-                self._dataset_prefix(), subj_idx, n_subjects,
             )
 
             # ------------------------------------------------------------------
@@ -343,7 +273,6 @@ class MoabbDatasetLoader(BaseDatasetLoader):
                 "s" if len(session_int_map) != 1 else "",
             )
 
-            self._save_subject_to_cache(subject_id, subject_samples)
             all_samples.extend(subject_samples)
 
         logger.info(

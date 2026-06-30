@@ -94,11 +94,6 @@ cfg = ExperimentConfig(
     lso_subjects_per_test_set=1,
     test_session_idx=0,     # index of the held-out test session per subject
 
-    # Separate folder for preprocessed .pt cache files.
-    # Do NOT point this at mne_data — that's for raw MOABB downloads.
-    # This folder will be created automatically if it doesn't exist.
-    dataset_cache_dir=str(Path('data') / 'dataset_cache'),
-
     output_dir='results',
     seed=7_11_2002,
     force_retrain_base=True,   # dataset/channel set changed — retrain the base model

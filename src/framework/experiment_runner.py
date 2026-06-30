@@ -36,7 +36,6 @@ Usage example:
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import time
 import datetime
@@ -565,10 +564,6 @@ class ExperimentConfig:
     tmax: float = 4.0
     resample: Optional[float] = float(TARGET_SAMPLE_RATE)
 
-    # Preprocessed dataset cache directory.
-    # Set to a path to enable caching; None disables caching.
-    dataset_cache_dir: Optional[str] = None
-
     # Base model checkpoint behaviour.
     # Set force_retrain_base=True to delete any existing base_model.ckpt and
     # retrain from scratch.  Useful after changing datasets, channel set, or
@@ -625,32 +620,12 @@ def load_datasets(
     cfg: ExperimentConfig,
 ) -> Dict[str, EEGSampleDataset]:
     """
-    Load all configured datasets.
-
-    Per-dataset cache behaviour (when cfg.dataset_cache_dir is set):
-      - The cache key is an MD5 hash of dataset ID + preprocessing params +
-        label map.  If the matching .pt file exists it is loaded from disk
-        and MOABB / preprocessing are skipped entirely.
-      - A cache HIT is logged as:
-            [X/N] DatasetName — loaded from cache: path/to/file.pt (M samples)
-      - A cache MISS is logged as:
-            [X/N] DatasetName — not cached, running MOABB download + preprocessing
-        followed by the per-subject progress lines emitted by MoabbDatasetLoader.
-      - After a successful MOABB load the result is written to cache:
-            [X/N] DatasetName — saved to cache: path/to/file.pt
-
-    Delete the cache directory (or individual .pt files) to force a reload.
+    Load all configured datasets by downloading fresh from MOABB every run.
+    No caching — avoids stale .pt files from failed previous jobs poisoning
+    subsequent runs.
     """
     shared_labels, schemas = infer_shared_label_schema(cfg.dataset_ids)
     logger.info("Shared label space: %s", shared_labels)
-
-    cache_dir: Optional[Path] = None
-    if cfg.dataset_cache_dir:
-        cache_dir = Path(cfg.dataset_cache_dir)
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        logger.info("Dataset cache directory: %s", cache_dir)
-    else:
-        logger.info("Dataset caching disabled (set dataset_cache_dir to enable)")
 
     loaded: Dict[str, EEGSampleDataset] = {}
     n_datasets = len(cfg.datasets)
@@ -662,46 +637,8 @@ def load_datasets(
             subjects = cfg.subjects_per_dataset[i - 1]
 
         ds_prefix = f"[{i}/{n_datasets}] {did}"
+        logger.info("%s — downloading + preprocessing via MOABB", ds_prefix)
 
-        # ── Try whole-dataset cache first ─────────────────────────────────
-        # This is a dataset-level cache (one .pt per dataset).  The
-        # per-subject cache inside MoabbDatasetLoader is a finer-grained
-        # fallback used when this file does not exist yet.
-        if cache_dir is not None:
-            schema_key = "|".join(sorted(DATASET_LABEL_MAPS[did].keys()))
-            cache_key = hashlib.md5(
-                f"{did}|{subjects}|{cfg.fmin}|{cfg.fmax}|"
-                f"{cfg.tmin}|{cfg.tmax}|{cfg.resample}|{schema_key}".encode()
-            ).hexdigest()[:10]
-            cache_path = cache_dir / f"{did}_{cache_key}.pt"
-
-            if cache_path.exists():
-                logger.info(
-                    "%s — loading full dataset from cache: %s",
-                    ds_prefix, cache_path,
-                )
-                try:
-                    ds = torch.load(cache_path, weights_only=False)
-                    loaded[did] = ds
-                    logger.info(
-                        "%s — cache hit: %d samples, %d classes",
-                        ds_prefix, len(ds), schema.n_classes,
-                    )
-                    continue
-                except Exception as exc:
-                    logger.warning(
-                        "%s — cache load failed (%s) — re-running MOABB",
-                        ds_prefix, exc,
-                    )
-            else:
-                logger.info(
-                    "%s — no full-dataset cache found, running MOABB download + preprocessing",
-                    ds_prefix,
-                )
-
-        # ── Load from MOABB + preprocess ──────────────────────────────────
-        # dataset_index / dataset_total are passed so MoabbDatasetLoader can
-        # emit the same [X/N] prefix on its per-subject progress lines.
         loader = MoabbDatasetLoader(
             moabb_dataset=moabb_ds,
             dataset_id=did,
@@ -715,7 +652,6 @@ def load_datasets(
             subjects=subjects,
             dataset_index=i,
             dataset_total=n_datasets,
-            cache_dir=cfg.dataset_cache_dir,   # per-subject cache inside the loader
         )
         ds = loader.load_all_subjects()
         loaded[did] = ds
@@ -723,14 +659,6 @@ def load_datasets(
             "%s — loaded %d samples, %d classes",
             ds_prefix, len(ds), schema.n_classes,
         )
-
-        # ── Save whole-dataset cache ──────────────────────────────────────
-        if cache_dir is not None:
-            try:
-                torch.save(ds, cache_path)
-                logger.info("%s — saved full dataset to cache: %s", ds_prefix, cache_path)
-            except Exception as exc:
-                logger.warning("%s — could not write cache: %s", ds_prefix, exc)
 
     # ── Optional data fraction ────────────────────────────────────────────
     if cfg.data_fraction < 1.0:
