@@ -46,11 +46,13 @@ export PYTHONUNBUFFERED=1
 # (module load / venv activate / profile scripts) can silently clobber it
 # with a stale value from a previous job's scratch directory.
 # -------------------------------------------------------
+
 unset MNE_DATA
 unset MOABB_DOWNLOAD_DIR
 export MOABB_DOWNLOAD_DIR=/scratch/${SLURM_JOB_ID}/mne_data
 export MNE_DATA="$MOABB_DOWNLOAD_DIR"
 mkdir -p "$MNE_DATA"
+rm -f ~/.mne-python/mne-python.json
 echo "MNE_DATA           = $MNE_DATA"
 echo "MOABB_DOWNLOAD_DIR  = $MOABB_DOWNLOAD_DIR"
 
