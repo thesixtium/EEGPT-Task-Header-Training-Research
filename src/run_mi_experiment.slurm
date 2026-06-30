@@ -21,14 +21,6 @@ echo "Node     : $SLURMD_NODENAME"
 echo "Started  : $(date)"
 echo "Directory: $(pwd)"
 
-# Put raw MOABB downloads on scratch (fast, auto-cleaned after 5 days)
-export MOABB_DOWNLOAD_DIR=/scratch/${SLURM_JOB_ID}/mne_data
-mkdir -p "$MOABB_DOWNLOAD_DIR"
-# Always set MNE_DATA from the current job ID — never inherit a stale path
-# from a previous job whose scratch directory has already been cleaned up.
-unset MNE_DATA
-export MNE_DATA="$MOABB_DOWNLOAD_DIR"
-
 # Activate the virtual environment
 module load cuda/11.3.0
 source ~/venv/bin/activate
@@ -47,6 +39,20 @@ export OMP_NUM_THREADS=8
 export OPENBLAS_NUM_THREADS=8
 export MKL_NUM_THREADS=8
 export PYTHONUNBUFFERED=1
+
+# -------------------------------------------------------
+# Put raw MOABB downloads on scratch (fast, auto-cleaned after 5 days).
+# Set this LAST, right before launching python, so nothing sourced above
+# (module load / venv activate / profile scripts) can silently clobber it
+# with a stale value from a previous job's scratch directory.
+# -------------------------------------------------------
+unset MNE_DATA
+unset MOABB_DOWNLOAD_DIR
+export MOABB_DOWNLOAD_DIR=/scratch/${SLURM_JOB_ID}/mne_data
+export MNE_DATA="$MOABB_DOWNLOAD_DIR"
+mkdir -p "$MNE_DATA"
+echo "MNE_DATA           = $MNE_DATA"
+echo "MOABB_DOWNLOAD_DIR  = $MOABB_DOWNLOAD_DIR"
 
 # Verify checkpoint exists before wasting queue time
 CKPT="lib/checkpoints/eegpt_mcae_58chs_4s_large4E.ckpt"
