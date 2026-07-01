@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=512G
+#SBATCH --mem=64G
 #SBATCH --time=24:00:00
 #SBATCH --partition=gpu-v100
 #SBATCH --gres=gpu:1
@@ -19,7 +19,6 @@ echo "Started  : $(date)"
 cd /home/aleksander.berezowsk/EEGPT-Task-Header-Training-Research
 echo "Directory: $(pwd)"
 
-# Activate the virtual environment
 module load cuda/11.3.0
 source ~/venv/bin/activate
 
@@ -32,23 +31,21 @@ pip install --no-deps -r ~/requirements_notorch.txt
 pip install pyhealth==1.1.6 --no-deps
 pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 torchmetrics
 
-# Thread counts to match --cpus-per-task
 export OMP_NUM_THREADS=8
 export OPENBLAS_NUM_THREADS=8
 export MKL_NUM_THREADS=8
 export PYTHONUNBUFFERED=1
 
-# Set MNE_DATA last so nothing sourced above can clobber it with a stale path
-unset MNE_DATA
-unset MOABB_DOWNLOAD_DIR
-export MOABB_DOWNLOAD_DIR=/scratch/${SLURM_JOB_ID}/mne_data
+# Persistent, job-independent data directory. NOT /scratch/$SLURM_JOB_ID —
+# that path disappears the moment the job ends, which is what caused the
+# "stale MNE_DATA" failures. This directory always exists, and reusing it
+# across runs means MOABB doesn't have to re-download the dataset every
+# single job.
+export MOABB_DOWNLOAD_DIR="$(pwd)/data/mne_data"
 export MNE_DATA="$MOABB_DOWNLOAD_DIR"
 mkdir -p "$MNE_DATA"
-rm -f ~/.mne-python/mne-python.json
-echo "MNE_DATA           = $MNE_DATA"
-echo "MOABB_DOWNLOAD_DIR = $MOABB_DOWNLOAD_DIR"
+echo "MNE_DATA = $MNE_DATA"
 
-# Verify checkpoint exists before wasting queue time
 CKPT="src/lib/checkpoints/eegpt_mcae_58chs_4s_large4E.ckpt"
 if [ ! -f "$CKPT" ]; then
     echo "ERROR: checkpoint not found at $CKPT - aborting."

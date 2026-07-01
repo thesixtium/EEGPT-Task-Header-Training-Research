@@ -46,12 +46,32 @@ logging.basicConfig(
 )
 
 # ---------------------------------------------------------------------------
-# Pin MOABB's raw-data download cache relative to the working directory.
-# Override MOABB_DOWNLOAD_DIR below if you want it somewhere else on disk.
+# Where MOABB downloads raw EEG data to.
+#
+# IMPORTANT: this is a plain, persistent directory under the project root —
+# NOT a SLURM scratch path (e.g. /scratch/$SLURM_JOB_ID). Scratch dirs are
+# unique per job and get cleaned up when the job ends, which previously
+# caused failures: MNE persists its own on-disk config file
+# (~/.mne-python/mne-python.json) independently of whatever the shell's
+# MNE_DATA env var says, so a later job could end up resolving a dead path
+# left over from an earlier job.
+#
+# Using one fixed directory sidesteps that whole class of bug — the path
+# always exists, and re-running simply reuses whatever MOABB already
+# downloaded there instead of re-fetching from the network every time.
 # ---------------------------------------------------------------------------
-MOABB_DOWNLOAD_DIR = os.environ.get('MOABB_DOWNLOAD_DIR', str(Path('data') / 'mne_data'))
-set_download_dir(MOABB_DOWNLOAD_DIR)
-os.makedirs(MOABB_DOWNLOAD_DIR, exist_ok=True)
+_DATA_DIR = Path(os.environ.get('MOABB_DOWNLOAD_DIR', Path('data') / 'mne_data')).resolve()
+_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+# Set the path in every place MNE/MOABB might look for it, so there is no
+# ambiguity: the environment variable, the process's own copy of it, and
+# MNE's persisted JSON config (which is what previously went stale).
+os.environ['MNE_DATA'] = str(_DATA_DIR)
+os.environ['MOABB_DOWNLOAD_DIR'] = str(_DATA_DIR)
+mne.utils.set_config('MNE_DATA', str(_DATA_DIR), set_env=True)
+set_download_dir(str(_DATA_DIR))
+
+logging.getLogger(__name__).info("MNE_DATA / MOABB download dir: %s", _DATA_DIR)
 
 # ---------------------------------------------------------------------------
 # Verify the pretrained EEGPT backbone is present before doing anything else.
