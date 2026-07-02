@@ -21,7 +21,21 @@ learning rate, or output paths.
 
 import logging
 import os
+import tempfile
 from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# Dataset download location — a fresh temp directory for THIS PROCESS ONLY.
+#
+# No persistence, no reuse across jobs, no config file, no env-var handoff
+# from the sbatch script. Every run downloads into a brand-new directory
+# that only this run knows about, so there is nothing left over from a
+# previous job to go stale. This must be set before mne/moabb are imported,
+# since that's when they first read MNE_DATA.
+# ---------------------------------------------------------------------------
+_DATA_DIR = tempfile.mkdtemp(prefix='moabb_data_')
+os.environ['MNE_DATA'] = _DATA_DIR
+os.environ['MOABB_DOWNLOAD_DIR'] = _DATA_DIR
 
 # ---------------------------------------------------------------------------
 # Silence MNE and MOABB before any other imports so their internal loggers
@@ -34,7 +48,6 @@ import mne
 mne.set_log_level("WARNING")
 logging.getLogger("moabb").setLevel(logging.WARNING)
 
-from moabb.utils import set_download_dir
 from moabb.datasets import BNCI2014_001
 
 from framework.experiment_runner import ExperimentConfig, run_experiment
@@ -45,40 +58,7 @@ logging.basicConfig(
     format='%(asctime)s  %(levelname)-8s  %(name)s  %(message)s',
 )
 
-# ---------------------------------------------------------------------------
-# Where MOABB downloads raw EEG data to.
-#
-# Respect MNE_DATA / MOABB_DOWNLOAD_DIR if the caller (the sbatch script)
-# already set them — that's expected to be a persistent, job-independent
-# path (e.g. $(pwd)/data/mne_data), which is exactly right and lets repeat
-# jobs reuse already-downloaded data instead of re-fetching every time.
-# Only fall back to a fixed home-dir default if neither is set.
-#
-# Either way, NEVER a SLURM scratch path (/scratch/$SLURM_JOB_ID) — those
-# are wiped when the job ends, and MNE's persisted config file
-# (~/.mne-python/mne-python.json) doesn't know that, so a later job can
-# silently resolve a dead path left over from an earlier one. That's what
-# caused the original failure. Fix: don't trust the persisted config at
-# all — delete it and rebuild it fresh every run from whatever path is
-# actually valid right now.
-# ---------------------------------------------------------------------------
-_DATA_DIR = Path(
-    os.environ.get('MOABB_DOWNLOAD_DIR')
-    or os.environ.get('MNE_DATA')
-    or (Path.home() / 'eegpt_mne_data')
-).resolve()
-_DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-_mne_config_path = Path.home() / '.mne-python' / 'mne-python.json'
-if _mne_config_path.exists():
-    _mne_config_path.unlink()  # drop any stale MNE_DATA left by a previous SLURM job
-
-os.environ['MNE_DATA'] = str(_DATA_DIR)
-os.environ['MOABB_DOWNLOAD_DIR'] = str(_DATA_DIR)
-mne.utils.set_config('MNE_DATA', str(_DATA_DIR), set_env=True)
-set_download_dir(str(_DATA_DIR))
-
-logging.getLogger(__name__).info("MNE_DATA / MOABB download dir: %s", _DATA_DIR)
+logging.getLogger(__name__).info("MOABB download dir (temporary, this run only): %s", _DATA_DIR)
 
 # ---------------------------------------------------------------------------
 # Verify the pretrained EEGPT backbone is present before doing anything else.

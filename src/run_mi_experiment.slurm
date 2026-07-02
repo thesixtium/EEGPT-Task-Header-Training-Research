@@ -36,15 +36,9 @@ export OPENBLAS_NUM_THREADS=8
 export MKL_NUM_THREADS=8
 export PYTHONUNBUFFERED=1
 
-# Persistent, job-independent data directory. NOT /scratch/$SLURM_JOB_ID —
-# that path disappears the moment the job ends, which is what caused the
-# "stale MNE_DATA" failures. This directory always exists, and reusing it
-# across runs means MOABB doesn't have to re-download the dataset every
-# single job.
-export MOABB_DOWNLOAD_DIR="$(pwd)/data/mne_data"
-export MNE_DATA="$MOABB_DOWNLOAD_DIR"
-mkdir -p "$MNE_DATA"
-echo "MNE_DATA = $MNE_DATA"
+# Dataset download location is handled entirely inside run_mi_experiment.py
+# (a fresh temp directory, created fresh every job, deleted with the rest of
+# /tmp when the job ends). No env vars to set here.
 
 CKPT="src/lib/checkpoints/eegpt_mcae_58chs_4s_large4E.ckpt"
 if [ ! -f "$CKPT" ]; then

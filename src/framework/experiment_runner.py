@@ -4,7 +4,7 @@ experiment_runner.py
 Top-level orchestration for the EEG motor imagery framework.
 
 Training strategy (LSO enabled):
-  1.  Load and preprocess all datasets (with optional .pt disk cache).
+  1.  Load and preprocess all datasets fresh from MOABB (no disk cache).
   2.  Build a joint dataset with globally-unique subject IDs.
   3.  Train ONE shared base model on all subjects NOT selected as holdouts.
   4.  For each held-out subject:
@@ -1064,7 +1064,7 @@ def run_experiment(cfg: ExperimentConfig) -> None:
     Execute the full experiment pipeline described in ExperimentConfig.
 
     Steps:
-      1. Load and preprocess all datasets (with optional disk cache)
+      1. Load and preprocess all datasets fresh from MOABB (no disk cache)
       2. Build joint dataset with globally unique subject IDs
       3. Train ONE shared base model on all subjects NOT selected as holdouts
       4. For each held-out subject:
@@ -1080,37 +1080,10 @@ def run_experiment(cfg: ExperimentConfig) -> None:
     np.random.seed(cfg.seed)
     torch.manual_seed(cfg.seed)
 
-    # ── Allow MOABB download dir to be overridden by environment variable ──
-    # The SLURM script sets MOABB_DOWNLOAD_DIR to /scratch/$SLURM_JOB_ID/mne_data
-    # so raw downloads land on fast scratch storage and don't eat /home quota.
-    import os as _os
-    _moabb_env_dir = _os.environ.get('MOABB_DOWNLOAD_DIR')
-    if _moabb_env_dir:
-        try:
-            from moabb.utils import set_download_dir as _set_dl
-            _set_dl(_moabb_env_dir)
-            Path(_moabb_env_dir).mkdir(parents=True, exist_ok=True)
-            logger.info("MOABB download dir set from env: %s", _moabb_env_dir)
-        except Exception as _e:
-            logger.warning("Could not set MOABB download dir from env: %s", _e)
-
-    # ── Also ensure MNE_DATA directory exists if set ──────────────────────
-    # MNE reads MNE_DATA independently of MOABB_DOWNLOAD_DIR.  If this env
-    # var points to a path from a previous SLURM job that no longer exists
-    # (e.g. /scratch/<old_job_id>/mne_data), every MOABB download attempt
-    # will fail with "Download location ... does not exist".  Creating the
-    # directory here makes the run self-healing in that case.
-    _mne_data_dir = _os.environ.get('MNE_DATA')
-    if _mne_data_dir:
-        try:
-            Path(_mne_data_dir).mkdir(parents=True, exist_ok=True)
-            logger.info("MNE_DATA directory ensured: %s", _mne_data_dir)
-        except Exception as _e:
-            logger.warning(
-                "Could not create MNE_DATA directory '%s': %s — "
-                "dataset downloads may fail if this path is stale.",
-                _mne_data_dir, _e,
-            )
+    # Dataset download location (MNE_DATA / MOABB_DOWNLOAD_DIR) is set once,
+    # in run_mi_experiment.py, before mne/moabb are even imported. Nothing
+    # here needs to touch it — a second place reading and re-setting the
+    # same env vars is exactly what caused the stale-path bugs before.
 
     # ── Detect accelerator ────────────────────────────────────────────────
     if torch.cuda.is_available():
@@ -1191,13 +1164,12 @@ def run_experiment(cfg: ExperimentConfig) -> None:
             raise RuntimeError(
                 f"The following datasets loaded 0 samples, causing the channel "
                 f"intersection to become empty: {empty_datasets}.\n"
-                f"This is almost always a download failure.  Check that the "
-                f"directories below exist and are writable:\n"
+                f"This is almost always a download failure (e.g. no network "
+                f"access to the dataset host, or a MOABB/MNE version mismatch). "
+                f"Check the warnings logged above for the actual per-subject "
+                f"download error.\n"
                 f"  MNE_DATA           = {_os.environ.get('MNE_DATA', '(not set)')}\n"
-                f"  MOABB_DOWNLOAD_DIR = {_os.environ.get('MOABB_DOWNLOAD_DIR', '(not set)')}\n"
-                f"If these point to a path from a previous SLURM job that has "
-                f"since been cleaned up, unset MNE_DATA and MOABB_DOWNLOAD_DIR "
-                f"(or point them to an existing directory) and re-run."
+                f"  MOABB_DOWNLOAD_DIR = {_os.environ.get('MOABB_DOWNLOAD_DIR', '(not set)')}"
             )
         raise RuntimeError(
             "No channels remain after intersecting all datasets. "
