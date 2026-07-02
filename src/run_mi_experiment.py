@@ -48,24 +48,31 @@ logging.basicConfig(
 # ---------------------------------------------------------------------------
 # Where MOABB downloads raw EEG data to.
 #
-# IMPORTANT: this is a plain, persistent directory under the project root —
-# NOT a SLURM scratch path (e.g. /scratch/$SLURM_JOB_ID). Scratch dirs are
-# unique per job and get cleaned up when the job ends, which previously
-# caused failures: MNE persists its own on-disk config file
-# (~/.mne-python/mne-python.json) independently of whatever the shell's
-# MNE_DATA env var says, so a later job could end up resolving a dead path
-# left over from an earlier job.
+# Respect MNE_DATA / MOABB_DOWNLOAD_DIR if the caller (the sbatch script)
+# already set them — that's expected to be a persistent, job-independent
+# path (e.g. $(pwd)/data/mne_data), which is exactly right and lets repeat
+# jobs reuse already-downloaded data instead of re-fetching every time.
+# Only fall back to a fixed home-dir default if neither is set.
 #
-# Using one fixed directory sidesteps that whole class of bug — the path
-# always exists, and re-running simply reuses whatever MOABB already
-# downloaded there instead of re-fetching from the network every time.
+# Either way, NEVER a SLURM scratch path (/scratch/$SLURM_JOB_ID) — those
+# are wiped when the job ends, and MNE's persisted config file
+# (~/.mne-python/mne-python.json) doesn't know that, so a later job can
+# silently resolve a dead path left over from an earlier one. That's what
+# caused the original failure. Fix: don't trust the persisted config at
+# all — delete it and rebuild it fresh every run from whatever path is
+# actually valid right now.
 # ---------------------------------------------------------------------------
-_DATA_DIR = Path(os.environ.get('MOABB_DOWNLOAD_DIR', Path('data') / 'mne_data')).resolve()
+_DATA_DIR = Path(
+    os.environ.get('MOABB_DOWNLOAD_DIR')
+    or os.environ.get('MNE_DATA')
+    or (Path.home() / 'eegpt_mne_data')
+).resolve()
 _DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Set the path in every place MNE/MOABB might look for it, so there is no
-# ambiguity: the environment variable, the process's own copy of it, and
-# MNE's persisted JSON config (which is what previously went stale).
+_mne_config_path = Path.home() / '.mne-python' / 'mne-python.json'
+if _mne_config_path.exists():
+    _mne_config_path.unlink()  # drop any stale MNE_DATA left by a previous SLURM job
+
 os.environ['MNE_DATA'] = str(_DATA_DIR)
 os.environ['MOABB_DOWNLOAD_DIR'] = str(_DATA_DIR)
 mne.utils.set_config('MNE_DATA', str(_DATA_DIR), set_env=True)

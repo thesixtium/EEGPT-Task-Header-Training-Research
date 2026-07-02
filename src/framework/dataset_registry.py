@@ -93,9 +93,11 @@ class MoabbDatasetLoader(BaseDatasetLoader):
     dataset_index : 1-based position of this dataset in the full run
                     (used in progress log lines, e.g. [3/47])
     dataset_total : total number of datasets in the run
-    cache_dir : if provided, processed .pt tensors are read/written here
-                so subjects that have already been preprocessed are not
-                re-downloaded or re-processed on subsequent runs
+
+    Note: this loader always downloads/loads fresh via MOABB's own paradigm
+    call — there is no separate on-disk tensor cache here. MOABB itself
+    caches the raw downloaded files under MNE_DATA, which is the only
+    caching layer in play.
     """
 
     def __init__(
