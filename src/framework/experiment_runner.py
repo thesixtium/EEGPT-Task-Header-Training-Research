@@ -514,6 +514,131 @@ class EpochStatusCallback(pl.Callback):
         )
 
 
+class TrainTestCurveCallback(pl.Callback):
+    """
+    After every validation epoch, evaluates the model on a held-out test
+    set and refreshes a single train-vs-test curve plot (plus a small JSON
+    history file) in `curves_dir`.
+
+    The plot/history files are OVERWRITTEN each epoch — this produces one
+    always-up-to-date "train vs held-out test" figure per training run,
+    not a new file per epoch.
+    """
+
+    HISTORY_FILENAME = 'train_test_curves_history.json'
+
+    def __init__(
+        self,
+        test_loader,
+        curves_dir: Path,
+        filename: str = 'train_test_curves.png',
+    ) -> None:
+        super().__init__()
+        self._test_loader = test_loader
+        self._curves_dir = Path(curves_dir)
+        self._filename = filename
+        self._history: Dict[str, List[Optional[float]]] = {'epoch': []}
+
+    def on_validation_epoch_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule
+    ) -> None:
+        # Skip the sanity-check pass (epoch == 0 before training starts),
+        # same as EpochStatusCallback.
+        if trainer.sanity_checking:
+            return
+
+        was_training = pl_module.training
+        pl_module.eval()
+        try:
+            test_metrics = compute_metrics_from_model(pl_module, self._test_loader)
+        finally:
+            pl_module.train(was_training)
+
+        current_epoch = trainer.current_epoch + 1   # 0-indexed → 1-indexed
+        logged = trainer.callback_metrics
+
+        def _get(key: str) -> Optional[float]:
+            v = logged.get(key)
+            return float(v) if v is not None else None
+
+        self._history.setdefault('epoch', []).append(current_epoch)
+
+        for key, test_val in test_metrics.items():
+            # Best-effort match against the Lightning-logged training metric
+            # for this same quantity (e.g. test key "accuracy" ↔ logged
+            # "train_acc" or "train_accuracy").
+            train_key_candidates = [
+                f'train_{key}',
+                f'train_{key.replace("accuracy", "acc")}',
+                key,
+            ]
+            train_val = None
+            for cand in train_key_candidates:
+                train_val = _get(cand)
+                if train_val is not None:
+                    break
+
+            self._history.setdefault(f'test_{key}', []).append(float(test_val))
+            self._history.setdefault(f'train_{key}', []).append(train_val)
+
+        try:
+            self._curves_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as exc:
+            logger.warning("Could not create curves dir %s: %s", self._curves_dir, exc)
+            return
+
+        try:
+            import json
+            (self._curves_dir / self.HISTORY_FILENAME).write_text(
+                json.dumps(self._history, indent=2), encoding='utf-8'
+            )
+        except Exception as exc:
+            logger.warning("Could not write %s: %s", self.HISTORY_FILENAME, exc)
+
+        self._plot()
+
+    def _plot(self) -> None:
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+        except Exception as exc:
+            logger.warning("Could not import matplotlib for train/test curve plot: %s", exc)
+            return
+
+        metric_keys = sorted(
+            k[len('test_'):] for k in self._history if k.startswith('test_')
+        )
+        if not metric_keys:
+            return
+
+        epochs = self._history['epoch']
+        n = len(metric_keys)
+        fig, axes = plt.subplots(n, 1, figsize=(7, 4 * n), squeeze=False)
+
+        for ax, key in zip(axes[:, 0], metric_keys):
+            train_vals = self._history.get(f'train_{key}', [])
+            test_vals = self._history.get(f'test_{key}', [])
+            if any(v is not None for v in train_vals):
+                ax.plot(epochs, train_vals, label='train', marker='o')
+            ax.plot(epochs, test_vals, label='held-out test', marker='o')
+            ax.set_xlabel('epoch')
+            ax.set_ylabel(key)
+            ax.set_title(f'{key}: train vs held-out test')
+            ax.legend()
+            ax.grid(alpha=0.3)
+
+        fig.tight_layout()
+        out_path = self._curves_dir / self._filename
+        try:
+            fig.savefig(out_path)
+            logger.info("Updated train/test curve plot: %s", out_path)
+        except Exception as exc:
+            logger.warning("Could not save train/test curve plot: %s", exc)
+        finally:
+            plt.close(fig)
+
+
 def _fmt_duration(seconds: float) -> str:
     seconds = int(max(0, seconds))
     h, rem = divmod(seconds, 3600)
@@ -812,11 +937,16 @@ def train_base_model(
         len(training_dataset),
     )
 
-    train_set, val_set, _ = train_val_test_split(
+    train_set, val_set, test_set = train_val_test_split(
         training_dataset,
         val_ratio=0.1,
         test_ratio=0.1,
         seed=cfg.seed,
+    )
+    logger.info(
+        "Base model train/val/test split (within the %d training subjects): "
+        "%d train / %d val / %d held-out test samples",
+        len(training_dataset.get_subject_ids()), len(train_set), len(val_set), len(test_set),
     )
 
     train_loader_obj = ConcatDataLoader(
@@ -831,6 +961,12 @@ def train_base_model(
         batch_size=cfg.batch_size,
         shuffle=False,
     )
+    # Built up-front (rather than only after training, as before) so a
+    # TrainTestCurveCallback can evaluate on it every epoch during fit().
+    test_loader_obj = (
+        ConcatDataLoader([test_set], batch_size=cfg.batch_size, shuffle=False)
+        if len(test_set) > 0 else None
+    )
 
     model = model_factory(
         channel_names=channel_names,
@@ -839,13 +975,32 @@ def train_base_model(
         max_epochs=cfg.base_epochs,
     )
 
+    # Curves directory is fixed up-front so the per-epoch train/test plot
+    # can be written to the same place the post-training train/val curves
+    # end up in.
+    _effective_logs_dir = Path(logs_dir) if logs_dir else checkpoints_dir / 'logs'
+    _curves_dir = _effective_logs_dir / 'base_model_training' / 'plots'
+
+    _base_callbacks: List[pl.Callback] = [
+        EpochStatusCallback(status, cfg.base_epochs, run_label='Base model training'),
+    ]
+    if test_loader_obj is not None:
+        # ── Per-epoch train-vs-held-out-test curve ──────────────────────
+        # Re-evaluates the model on the same held-out test split described
+        # below after every epoch and overwrites a single running plot
+        # (train_test_curves.png) + history file, rather than the previous
+        # behaviour of only checking test performance once at the very end.
+        _base_callbacks.append(
+            TrainTestCurveCallback(test_loader_obj.get_loader(), _curves_dir)
+        )
+
     trainer = pl.Trainer(
         accelerator=accelerator,
         max_epochs=cfg.base_epochs,
         log_every_n_steps=1,
         num_sanity_val_steps=0,
         default_root_dir=str(checkpoints_dir),
-        callbacks=[EpochStatusCallback(status, cfg.base_epochs, run_label='Base model training')],
+        callbacks=_base_callbacks,
         logger=[
             pl.loggers.CSVLogger(
                 str(logs_dir) if logs_dir else str(checkpoints_dir / 'logs'),
@@ -862,20 +1017,50 @@ def train_base_model(
     trainer.save_checkpoint(str(base_ckpt_path))
     logger.info("Shared base model saved to: %s", base_ckpt_path)
 
-    # ── Plot training curves ───────────────────────────────────────────────
-    _effective_logs_dir = Path(logs_dir) if logs_dir else checkpoints_dir / 'logs'
+    # ── Plot training curves (train vs val, per epoch) ─────────────────────
     if exp_logger is not None:
         exp_logger.generate_base_model_training_curves(
             logs_dir=_effective_logs_dir,
             run_name='base_model_training',
         )
+        # Prefer exp_logger's own curves dir if it differs from the default,
+        # so the final held-out report lands next to its train/val plots.
+        _curves_dir = exp_logger.base_model_curves_dir or _curves_dir
     else:
         from .analytics import TrainingCurvePlotter
         TrainingCurvePlotter.plot_from_trainer(
             logs_dir=_effective_logs_dir,
             run_name='base_model_training',
-            save_dir=_effective_logs_dir / 'base_model_training' / 'plots',
+            save_dir=_curves_dir,
         )
+
+    # ── Evaluate on the held-out test split ────────────────────────────────
+    # The train/val curves above show whether train and val diverge during
+    # training, and TrainTestCurveCallback (attached to the trainer above)
+    # has already been refreshing a train-vs-test curve every epoch. This
+    # final check re-evaluates the *fully trained* model on the 10% of
+    # training-pool samples that were never used for training OR for
+    # early-stopping/model-selection decisions, giving a second, independent
+    # read on generalization (a model can track val closely epoch-to-epoch
+    # and still generalize worse on unseen data if val was used to tune
+    # anything). This is UNRELATED to the single subject held out for LSO —
+    # that subject never appears anywhere in training_dataset at all.
+    test_metrics: Dict[str, float] = {}
+    if test_loader_obj is not None:
+        test_metrics = compute_metrics_from_model(model, test_loader_obj.get_loader())
+        logger.info("Base model held-out test metrics: %s", test_metrics)
+
+        try:
+            import json
+            _report_path = Path(_curves_dir) / 'held_out_test_metrics.json'
+            _report_path.parent.mkdir(parents=True, exist_ok=True)
+            _report_path.write_text(json.dumps(test_metrics, indent=2), encoding='utf-8')
+            logger.info("Held-out test metrics written to: %s", _report_path)
+        except Exception as exc:
+            logger.warning("Could not write held_out_test_metrics.json: %s", exc)
+
+        if exp_logger is not None:
+            exp_logger.log_config({'base_model_held_out_test_metrics': test_metrics})
 
     return base_ckpt_path
 
