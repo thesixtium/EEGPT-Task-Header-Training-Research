@@ -779,7 +779,10 @@ def train_base_model(
 
     Returns the path to the saved checkpoint.
     """
-    base_ckpt_path = checkpoints_dir / 'base_model.ckpt'
+    trained_model_dir = checkpoints_dir.parent / 'trainedModel'
+    trained_model_dir.mkdir(parents=True, exist_ok=True)
+    _ckpt_name = '_'.join(cfg.dataset_ids) + '_model.ckpt'
+    base_ckpt_path = trained_model_dir / _ckpt_name
 
     if base_ckpt_path.exists() and cfg.force_retrain_base:
         logger.warning(
@@ -790,11 +793,11 @@ def train_base_model(
 
     if base_ckpt_path.exists():
         logger.warning(
-            "Reusing base_model.ckpt from a PREVIOUS run: %s\n"
+            "Reusing %s from a PREVIOUS run: %s\n"
             "  This checkpoint may have been trained on different data, channels, "
             "or labels.\n"
             "  Set force_retrain_base=True in ExperimentConfig to retrain from scratch.",
-            base_ckpt_path,
+            _ckpt_name, base_ckpt_path,
         )
         status.phase(
             "Shared base model checkpoint found — skipping retraining "
@@ -856,7 +859,6 @@ def train_base_model(
         val_loader_obj.get_loader(),
     )
 
-    checkpoints_dir.mkdir(parents=True, exist_ok=True)
     trainer.save_checkpoint(str(base_ckpt_path))
     logger.info("Shared base model saved to: %s", base_ckpt_path)
 
@@ -1391,8 +1393,25 @@ def run_experiment(cfg: ExperimentConfig) -> None:
             )
             # Still count this fold so ETA and summary counts stay correct.
             status.folds_completed += 1
+
+            # Load the saved result back in so it still contributes to
+            # analytics/summary generation below — previously this branch
+            # left all_subject_results empty on a fully-resumed run, which
+            # crashed generate_adaptation_plots() with an empty sequence.
+            import json as _json
+            try:
+                _resumed_result = _json.loads(_result_path.read_text(encoding='utf-8'))
+                all_subject_results.append(_resumed_result)
+                exp_logger.log_subject_result(_to_subject_result(_resumed_result))
+            except Exception as exc:
+                logger.warning(
+                    "RESUME: could not reload saved result for %s (%s) — "
+                    "it will be excluded from this run's analytics",
+                    subject_label, exc,
+                )
             continue
         # ─────────────────────────────────────────────────────────────────
+
 
         status.subject_start(
             subject_id=held_out,
