@@ -63,8 +63,8 @@ logging.getLogger(__name__).info("MOABB download dir (temporary, this run only):
 # ---------------------------------------------------------------------------
 # Verify the pretrained EEGPT backbone is present before doing anything else.
 # ---------------------------------------------------------------------------
-_CKPT_PATH = Path('src') / 'lib' / 'checkpoints' / 'eegpt_mcae_58chs_4s_large4E.ckpt'
-
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent  # .../EEGPT-Task-Header-Training-Research
+_CKPT_PATH = _PROJECT_ROOT / 'src' / 'lib' / 'checkpoints' / 'eegpt_mcae_58chs_4s_large4E.ckpt'
 if not _CKPT_PATH.exists():
     raise FileNotFoundError(
         f'EEGPT checkpoint not found: {_CKPT_PATH}\n'
@@ -80,9 +80,7 @@ cfg = ExperimentConfig(
 
     # Path to the pretrained EEGPT backbone, relative to wherever you invoke
     # this script from (i.e. the project root).
-    base_model_path=str(
-        Path('src') / 'lib' / 'checkpoints' / 'eegpt_mcae_58chs_4s_large4E.ckpt'
-    ),
+    base_model_path=str(_CKPT_PATH),
 
     datasets=[BNCI2014_001()],
     dataset_ids=['BNCI2014_001'],
